@@ -1,0 +1,62 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:Dilexit/presentation/providers/wallet_provider.dart';
+import 'package:flutter/services.dart';
+
+class ReceiveScreen extends StatelessWidget {
+  const ReceiveScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final wallet = context.watch<WalletProvider>().state.wallet;
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Recibir APT')),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          children: [
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Icon(Icons.qr_code_2, size: 200, color: Colors.black), // Placeholder for actual QR
+            ),
+            const SizedBox(height: 40),
+            const Text('Tu dirección pública', style: TextStyle(color: Colors.grey)),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white10,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: SelectableText(
+                wallet?.publicAddress ?? 'Cargando...',
+                style: const TextStyle(color: Colors.white, fontFamily: 'monospace', fontSize: 13),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () {
+                if (wallet != null) {
+                  Clipboard.setData(ClipboardData(text: wallet.publicAddress));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Dirección copiada')),
+                  );
+                }
+              },
+              icon: const Icon(Icons.copy),
+              label: const Text('Copiar Dirección'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
