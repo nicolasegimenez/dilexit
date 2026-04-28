@@ -1,0 +1,3 @@
+-keep class com.google.generativeai.** { *; }
+-keep class com.dilexit.wallet.** { *; }
+-dontwarn com.google.generativeai.**

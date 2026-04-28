@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:Dilexit/presentation/providers/wallet_provider.dart';
+import 'package:dilexit/presentation/providers/wallet_provider.dart';
 
 class SendScreen extends StatefulWidget {
   const SendScreen({super.key});
@@ -21,46 +21,115 @@ class _SendScreenState extends State<SendScreen> {
     super.dispose();
   }
 
+  void _setMaxAmount(double balance) {
+    setState(() {
+      _amountController.text = balance.toStringAsFixed(8);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final provider = context.watch<WalletProvider>();
+    final double balance = provider.state.wallet?.balanceInApt ?? 0.0;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Enviar APT')),
+      appBar: AppBar(
+        title: const Text('Enviar APT'),
+      ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Balance Card / Info
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      'Saldo disponible',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: Colors.white70,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${balance.toStringAsFixed(4)} APT',
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32),
+              
+              // Address Field
               TextFormField(
                 controller: _addressController,
-                style: const TextStyle(color: Colors.white, fontFamily: 'monospace'),
-                decoration: const InputDecoration(
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'monospace',
+                  fontSize: 14,
+                ),
+                decoration: InputDecoration(
                   labelText: 'Dirección de destino',
                   hintText: '0x...',
-                ),
-                validator: (v) => (v == null || v.isEmpty) ? 'Requerido' : null,
-              ),
-              const SizedBox(height: 24),
-              TextFormField(
-                controller: _amountController,
-                style: const TextStyle(color: Colors.white),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(
-                  labelText: 'Monto',
-                  hintText: '0.00',
-                  suffixText: 'APT',
+                  prefixIcon: const Icon(Icons.account_balance_wallet_outlined, size: 20),
+                  helperText: 'Asegúrate de que la dirección sea correcta',
+                  helperStyle: TextStyle(color: Colors.grey[600], fontSize: 11),
                 ),
                 validator: (v) {
-                  if (v == null || v.isEmpty) return 'Requerido';
-                  if (double.tryParse(v) == null) return 'Monto inválido';
+                  if (v == null || v.isEmpty) return 'La dirección es requerida';
+                  if (!v.startsWith('0x')) return 'Dirección inválida (debe empezar con 0x)';
                   return null;
                 },
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 24),
+              
+              // Amount Field
+              TextFormField(
+                controller: _amountController,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(
+                  labelText: 'Monto a enviar',
+                  hintText: '0.00',
+                  prefixIcon: const Icon(Icons.monetization_on_outlined, size: 20),
+                  suffixIcon: Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: TextButton(
+                      onPressed: () => _setMaxAmount(balance),
+                      style: TextButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      child: const Text('MÁX'),
+                    ),
+                  ),
+                ),
+                validator: (v) {
+                  if (v == null || v.isEmpty) return 'El monto es requerido';
+                  final amount = double.tryParse(v);
+                  if (amount == null) return 'Monto inválido';
+                  if (amount <= 0) return 'El monto debe ser mayor a 0';
+                  if (amount > balance) return 'Saldo insuficiente';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 48),
+              
+              // Action Button
               ElevatedButton(
                 onPressed: provider.state.isTransferring
                     ? null
@@ -78,7 +147,13 @@ class _SendScreenState extends State<SendScreen> {
                             if (tx != null && mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('¡Transacción Enviada!'),
+                                  content: Row(
+                                    children: [
+                                      Icon(Icons.check_circle, color: Colors.white),
+                                      SizedBox(width: 12),
+                                      Text('¡Transacción enviada con éxito!'),
+                                    ],
+                                  ),
                                   backgroundColor: Colors.green,
                                 ),
                               );
@@ -96,13 +171,29 @@ class _SendScreenState extends State<SendScreen> {
                           }
                         }
                       },
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(56),
+                ),
                 child: provider.state.isTransferring
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                    ? const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.black,
+                            ),
+                          ),
+                          SizedBox(width: 12),
+                          Text('PROCESANDO...'),
+                        ],
                       )
-                    : const Text('Confirmar Envío'),
+                    : const Text(
+                        'CONFIRMAR ENVÍO',
+                        style: TextStyle(letterSpacing: 1.2),
+                      ),
               ),
             ],
           ),

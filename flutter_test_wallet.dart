@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:Dilexit/data/wallet_repository.dart';
-import 'package:Dilexit/data/aptos_wallet_client.dart';
+import 'package:dilexit/data/wallet_repository.dart';
+import 'package:dilexit/data/aptos_wallet_client.dart';
 import 'package:aptos/aptos.dart';
 
 void main() {

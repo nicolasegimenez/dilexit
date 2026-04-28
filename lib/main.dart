@@ -1,26 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:aptos/aptos.dart';
+import 'package:aptos/indexer_client.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
-import 'package:Dilexit/presentation/providers/wallet_provider.dart';
-import 'package:Dilexit/data/wallet_repository.dart';
-import 'package:Dilexit/data/aptos_wallet_client.dart';
-import 'package:Dilexit/data/secure_storage_service.dart';
-import 'package:Dilexit/constants/network.dart';
-import 'package:Dilexit/presentation/theme/app_theme.dart';
-import 'package:Dilexit/presentation/screens/splash_screen.dart';
+import 'package:dilexit/presentation/providers/wallet_provider.dart';
+import 'package:dilexit/presentation/providers/notification_provider.dart';
+import 'package:dilexit/presentation/providers/locale_provider.dart';
+import 'package:dilexit/data/wallet_repository.dart';
+import 'package:dilexit/data/aptos_wallet_client.dart';
+import 'package:dilexit/data/secure_storage_service.dart';
+import 'package:dilexit/constants/network.dart';
+import 'package:dilexit/presentation/theme/app_theme.dart';
+import 'package:dilexit/presentation/screens/splash_screen.dart';
+import 'package:dilexit/l10n/app_localizations.dart';
 
-void main() {
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   
-  final aptosClient = AptosClient(NetworkConstants.currentApi);
-  final walletClient = AptosWalletClient(aptosClient);
+  final aptosClient = AptosClient(Network.testnet.apiUrl);
+  final indexerClient = IndexerClient(Network.testnet.indexerUrl);
+  final walletClient = AptosWalletClient(aptosClient, indexerClient);
   final repository = WalletRepository(walletClient);
   final storageService = SecureStorageService();
 
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => WalletProvider(repository, storageService),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => LocaleProvider(storageService)),
+        ChangeNotifierProvider(create: (_) => WalletProvider(repository, storageService)),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
+      ],
       child: const MyApp(),
     ),
   );
@@ -31,10 +44,23 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = context.watch<LocaleProvider>();
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Dilexit Wallet',
       theme: AppTheme.darkTheme,
+      locale: localeProvider.locale,
+      supportedLocales: const [
+        Locale('en'),
+        Locale('es'),
+      ],
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       home: const SplashScreen(),
     );
   }

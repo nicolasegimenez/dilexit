@@ -1,7 +1,11 @@
-/// Data layer: Aptos Wallet API client
-/// Handles all network communication with Aptos blockchain
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 import 'package:aptos/aptos.dart';
 import 'package:aptos/coin_client.dart';
+import 'package:aptos/indexer_client.dart';
+import 'package:dilexit/models/wallet_activity.dart';
+import 'package:dilexit/models/token_balance.dart';
 
 class WalletException implements Exception {
   final String message;
@@ -11,16 +15,21 @@ class WalletException implements Exception {
 }
 
 class AptosWalletClient {
-  final AptosClient client;
+  AptosClient client;
+  IndexerClient indexerClient;
+  String indexerUrl;
 
-  AptosWalletClient(this.client);
+  AptosWalletClient(this.client, this.indexerClient, {this.indexerUrl = 'https://api.testnet.aptoslabs.com/v1/graphql'});
+
+  void updateClient(String apiUrl, String newIndexerUrl) {
+    client = AptosClient(apiUrl);
+    indexerClient = IndexerClient(newIndexerUrl);
+    indexerUrl = newIndexerUrl;
+  }
 
   /// Fetches the balance for a given wallet address
-  /// Returns balance in octas (1 APT = 10^8 octas)
   Future<BigInt> fetchBalance(String address) async {
     try {
-      // Use the view function to safely get balance. 
-      // It handles both legacy CoinStore and new Fungible Asset standard for APT.
       final balanceResp = await client.view(
         "0x1::coin::balance",
         ["0x1::aptos_coin::AptosCoin"],
@@ -32,10 +41,7 @@ class AptosWalletClient {
       }
       return BigInt.zero;
     } catch (e) {
-      // If the account hasn't been created on-chain yet or has no APT, it might throw.
-      // We catch this gracefully and return 0 instead of crashing.
       final errorMessage = e.toString().toLowerCase();
-      // DioException [bad response] throws when status is 404
       if (errorMessage.contains('account not found') || 
           errorMessage.contains('resource not found') ||
           errorMessage.contains('404') ||
@@ -43,19 +49,14 @@ class AptosWalletClient {
           errorMessage.contains('table item not found')) {
         return BigInt.zero;
       }
-      // Re-throw with context for better debugging
       throw WalletException('Failed to fetch balance for $address: $e');
     }
   }
 
-  /// Creates a new wallet on the blockchain
+  /// Placeholder for on-chain creation (not strictly needed for basic transfers)
   Future<void> createWalletOnChain(AptosAccount account) async {
-    try {
-      // Implementation for wallet creation on chain
-      // This would typically involve transaction submission
-    } catch (e) {
-      throw WalletException('Failed to create wallet on chain: $e');
-    }
+    // Currently Aptos accounts are created automatically upon first deposit
+    return;
   }
 
   /// Transfers APT to another account
@@ -70,6 +71,108 @@ class AptosWalletClient {
       return txHash;
     } catch (e) {
       throw WalletException('Failed to transfer: $e');
+    }
+  }
+
+  /// Fetches coin activities using the new fungible_asset_activities indexer table
+  Future<List<WalletActivity>> getCoinActivities(String address, {int limit = 20, int offset = 0}) async {
+    try {
+      final query = '''
+        query GetUserFAActivities(\$address: String!, \$limit: Int, \$offset: Int) {
+          fungible_asset_activities(
+            where: { owner_address: { _eq: \$address } }
+            limit: \$limit
+            offset: \$offset
+            order_by: { transaction_version: desc }
+          ) {
+            amount
+            type
+            asset_type
+            transaction_version
+            entry_function_id_str
+          }
+        }
+      ''';
+
+      final response = await http.post(
+        Uri.parse(indexerUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'query': query,
+          'variables': {
+            'address': address,
+            'limit': limit,
+            'offset': offset,
+          }
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['errors'] != null) {
+          debugPrint('GraphQL Error: ${data['errors']}');
+          return [];
+        }
+        
+        final List activities = data['data']['fungible_asset_activities'] ?? [];
+        return activities.map((e) => WalletActivity.fromJson(e)).toList();
+      } else {
+        debugPrint('HTTP Error fetching activities: ${response.statusCode}');
+        return [];
+      }
+    } catch (e) {
+      debugPrint('Error en el indexador: $e');
+      return [];
+    }
+  }
+
+  /// Fetches all fungible asset (token) balances for a given wallet address
+  Future<List<TokenBalance>> getAccountTokens(String address) async {
+    try {
+      final query = '''
+        query GetUserFungibleAssets(\$address: String!) {
+          current_fungible_asset_balances(
+            where: { owner_address: { _eq: \$address }, amount: { _gt: 0 } }
+          ) {
+            amount
+            asset_type
+            metadata {
+              name
+              symbol
+              decimals
+              asset_type
+            }
+          }
+        }
+      ''';
+
+      final response = await http.post(
+        Uri.parse(indexerUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'query': query,
+          'variables': {
+            'address': address,
+          }
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['errors'] != null) {
+          debugPrint('GraphQL Error: ${data['errors']}');
+          return [];
+        }
+        
+        final List assets = data['data']['current_fungible_asset_balances'] ?? [];
+        return assets.map((e) => TokenBalance.fromJson(e)).toList();
+      } else {
+        debugPrint('HTTP Error fetching tokens: ${response.statusCode}');
+        return [];
+      }
+    } catch (e) {
+      debugPrint('Error obteniendo tokens: $e');
+      return [];
     }
   }
 }

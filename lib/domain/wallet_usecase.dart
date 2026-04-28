@@ -1,5 +1,5 @@
 import 'package:aptos/aptos.dart';
-import 'package:Dilexit/domain/wallet_entity.dart';
+import 'package:dilexit/domain/wallet_entity.dart';
 
 abstract class WalletUseCase {
   Future<WalletEntity> createWallet();

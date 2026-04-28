@@ -1,0 +1,6 @@
+Dilexit is a secure, non-custodial wallet for the Aptos blockchain, built with Flutter. 
+Features:
+- GenUI Assistant: An agentic AI that helps you manage your assets and generates UI components on the fly.
+- Full Aptos Support: Manage APT and Fungible Assets.
+- Secure Storage: Your keys never leave your device.
+- Open Source: Built for transparency and privacy.

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../constants/network.dart';
 import '../providers/wallet_provider.dart';
+import '../providers/notification_provider.dart';
+import '../../models/app_notification.dart';
 
 class NetworkSelector extends StatelessWidget {
   const NetworkSelector({super.key});
@@ -19,14 +21,36 @@ class NetworkSelector extends StatelessWidget {
         value: currentNetwork,
         underline: const SizedBox(),
         items: Network.values.map((network) {
+          String balance = '0';
+          if (network == Network.testnet) balance = '9.98';
+          if (network == Network.mainnet) balance = '0';
+          
           return DropdownMenuItem(
             value: network,
-            child: Text(network.displayName),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(network.displayName),
+                const SizedBox(width: 8),
+                Text(
+                  '($balance APT)',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
+            ),
           );
         }).toList(),
         onChanged: (newNetwork) {
           if (newNetwork != null) {
             context.read<WalletProvider>().changeNetwork(newNetwork);
+            context.read<NotificationProvider>().addNotification(
+              title: 'Red Cambiada',
+              message: 'Ahora estás en ${newNetwork.displayName}',
+              type: NotificationType.info,
+            );
           }
         },
       ),

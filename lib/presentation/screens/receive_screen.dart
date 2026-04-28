@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:Dilexit/presentation/providers/wallet_provider.dart';
+import 'package:dilexit/presentation/providers/wallet_provider.dart';
 import 'package:flutter/services.dart';
 
 class ReceiveScreen extends StatelessWidget {
@@ -17,15 +17,8 @@ class ReceiveScreen extends StatelessWidget {
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Icon(Icons.qr_code_2, size: 200, color: Colors.black), // Placeholder for actual QR
-            ),
+            const SizedBox(height: 40),
+            const Icon(Icons.account_balance_wallet_outlined, size: 80, color: Colors.greenAccent),
             const SizedBox(height: 40),
             const Text('Tu dirección pública', style: TextStyle(color: Colors.grey)),
             const SizedBox(height: 12),

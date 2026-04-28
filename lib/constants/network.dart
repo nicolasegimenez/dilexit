@@ -1,26 +1,28 @@
-/// Network configuration constants for Aptos blockchain.
-///
-/// Currently configured for TESTNET.
-/// Change to mainnet URLs when ready for production.
+enum Network {
+  mainnet(
+    'Mainnet', 
+    'https://api.mainnet.aptoslabs.com/v1', 
+    'https://api.mainnet.aptoslabs.com/v1/graphql'
+  ),
+  testnet(
+    'Testnet', 
+    'https://api.testnet.aptoslabs.com/v1', 
+    'https://api.testnet.aptoslabs.com/v1/graphql'
+  ),
+  devnet(
+    'Devnet', 
+    'https://api.devnet.aptoslabs.com/v1', 
+    'https://api.devnet.aptoslabs.com/v1/graphql'
+  );
+
+  final String displayName;
+  final String apiUrl;
+  final String indexerUrl;
+  const Network(this.displayName, this.apiUrl, this.indexerUrl);
+}
+
 class NetworkConstants {
   NetworkConstants._();
-
-  /// Aptos Testnet RPC endpoint.
-  static const String testnetApi = 'https://fullnode.testnet.aptoslabs.com/v1';
-
-  /// Aptos Mainnet RPC endpoint (for future use).
-  static const String mainnetApi = 'https://fullnode.mainnet.aptoslabs.com/v1';
-
-  /// Aptos Devnet RPC endpoint (for development).
-  static const String devnetApi = 'https://fullnode.devnet.aptoslabs.com/v1';
-
-  /// Current active network endpoint.
-  /// Change this to switch between networks.
-  static const String currentApi = testnetApi;
-
-  /// Testnet faucet URL for requesting test tokens.
   static const String testnetFaucet = 'https://faucet.testnet.aptoslabs.com';
-
-  /// Explorer URL for viewing transactions.
   static const String explorerUrl = 'https://explorer.aptoslabs.com';
 }
