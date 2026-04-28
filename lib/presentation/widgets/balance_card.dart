@@ -24,7 +24,7 @@ class _BalanceCardState extends State<BalanceCard> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     
-    // Formatear el balance para separar el número del símbolo
+    // Format balance to separate number from symbol
     String balanceText = widget.formattedBalance;
     String symbol = ' APT';
     if (balanceText.endsWith(' APT')) {
@@ -37,7 +37,7 @@ class _BalanceCardState extends State<BalanceCard> {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       child: Stack(
         children: [
-          // Efecto de brillo de fondo
+          // Background glow effect
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
@@ -53,7 +53,7 @@ class _BalanceCardState extends State<BalanceCard> {
               ),
             ),
           ),
-          // Tarjeta principal con Glassmorphism
+          // Main card with Glassmorphism
           ClipRRect(
             borderRadius: BorderRadius.circular(28),
             child: BackdropFilter(
@@ -82,7 +82,7 @@ class _BalanceCardState extends State<BalanceCard> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'Balance Total',
+                          'Total Balance',
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.7),
                             fontSize: 15,
@@ -142,12 +142,11 @@ class _BalanceCardState extends State<BalanceCard> {
                             ]
                           ],
                         ),
-                      ),
-                    const SizedBox(height: 20),
-                    // Refrescar y estado
-                    GestureDetector(
-                      onTap: widget.isLoading ? null : widget.onRefresh,
-                      child: Container(
+                        ),
+                        const SizedBox(height: 20),
+                        // Refresh and state
+                        GestureDetector(
+                        onTap: widget.isLoading ? null : widget.onRefresh,                      child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
                           color: Colors.black.withValues(alpha: 0.25),
@@ -166,7 +165,7 @@ class _BalanceCardState extends State<BalanceCard> {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              'Actualizar',
+                              'Update',
                               style: TextStyle(
                                 color: Colors.white.withValues(alpha: 0.7),
                                 fontSize: 13,

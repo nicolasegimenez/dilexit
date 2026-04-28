@@ -65,63 +65,10 @@ class AppLocalizations {
       'mainnet': 'Aptos Mainnet',
       'testnet': 'Aptos Testnet',
     },
-    'es': {
-      'app_title': 'Dilexit Wallet',
-      'send': 'Enviar',
-      'receive': 'Recibir',
-      'history': 'Actividad',
-      'explore': 'Explorar',
-      'settings': 'Ajustes',
-      'wallet': 'Billetera',
-      'available_balance': 'Saldo disponible',
-      'send_apt': 'Enviar APT',
-      'destination_address': 'Dirección de destino',
-      'amount': 'Monto a enviar',
-      'confirm_send': 'CONFIRMAR ENVÍO',
-      'processing': 'PROCESANDO...',
-      'success_send': '¡Transacción enviada con éxito!',
-      'error': 'Error',
-      'wallets': 'Wallets',
-      'main_account': 'Cuenta Principal',
-      'saved_wallet': 'Billetera Guardada',
-      'change_wallet': 'Cambiar Wallets',
-      'create_new_wallet': 'Crear Nueva Wallet',
-      'import_wallet': 'Importar Billetera',
-      'export_keys': 'Exportar Claves',
-      'delete_wallet_q': '¿Eliminar Billetera?',
-      'delete_warning': 'Esta acción quitará la billetera de la lista local. Asegúrate de tener tu frase semilla respaldada.',
-      'cancel': 'CANCELAR',
-      'delete': 'ELIMINAR',
-      'wallet_deleted': 'Billetera eliminada correctamente',
-      'import_title': 'Importar Billetera',
-      'import_desc': 'Ingresa tu frase semilla de 12 palabras para recuperar tu acceso.',
-      'wallet_name': 'Nombre de la Billetera',
-      'seed_phrase': 'Frase Semilla',
-      'paste': 'PEGAR',
-      'security_warning': 'Nunca compartas tu frase semilla con nadie. Quién la tenga, tendrá tus fondos.',
-      'export_title': 'Copia de Seguridad',
-      'danger': '¡PELIGRO!',
-      'danger_desc': 'Nunca compartas tu Clave Privada o Frase Semilla. Cualquier persona con esta información puede robar todos tus fondos.',
-      'public_address': 'Dirección Pública',
-      'private_key': 'Clave Privada',
-      'understand_close': 'ENTENDIDO Y CERRAR',
-      'copied': 'copiado al portapapeles',
-      'language': 'Idioma',
-      'logout': 'Cerrar Sesión',
-      'logout_warning_title': 'Cerrar Sesión y Borrar Datos',
-      'logout_warning_desc': 'Esto eliminará TODAS las billeteras de este dispositivo. Necesitarás tus frases semilla para recuperarlas. ¿Estás seguro?',
-      'no_wallets': 'No tienes una wallet configurada',
-      'create_wallet': 'Crear Wallet',
-      'import_with_seed': 'Importar con Frase Semilla',
-      'your_tokens': 'Tus Tokens',
-      'network': 'Red',
-      'mainnet': 'Aptos Mainnet',
-      'testnet': 'Aptos Testnet',
-    },
   };
 
   String translate(String key) {
-    return _localizedValues[locale.languageCode]?[key] ?? key;
+    return _localizedValues[locale.languageCode]?[key] ?? _localizedValues['en']?[key] ?? key;
   }
 }
 
@@ -130,7 +77,7 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
 
   @override
   bool isSupported(Locale locale) {
-    return ['en', 'es'].contains(locale.languageCode);
+    return ['en'].contains(locale.languageCode);
   }
 
   @override

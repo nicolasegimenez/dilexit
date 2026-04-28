@@ -15,11 +15,11 @@ class TokenBalance {
 
   factory TokenBalance.fromJson(Map<String, dynamic> json) {
     final metadata = json['metadata'] ?? {};
-    final decimals = metadata['decimals'] ?? 8; // Default 8 (como APT)
+    final decimals = metadata['decimals'] ?? 8; // Default 8 (like APT)
     final rawAmount = double.tryParse(json['amount']?.toString() ?? '0') ?? 0;
     
-    // Formatear el monto dividiendo por la cantidad de decimales
-    // Nota: math.pow no está disponible sin importar dart:math, usando multiplicación simple para 10^decimals
+    // Format the amount by dividing by the number of decimals
+    // Note: math.pow is not available without importing dart:math, using simple multiplication for 10^decimals
     double divisor = 1.0;
     for (int i = 0; i < decimals; i++) {
       divisor *= 10;

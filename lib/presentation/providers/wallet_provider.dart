@@ -12,8 +12,8 @@ class WalletProvider with ChangeNotifier {
   final WalletRepository _repository;
   final SecureStorageService _storageService;
 
-  WalletProvider(this._repository, this._storageService) : _state = WalletState.loading('Iniciando...') {
-    // Intentar cargar la wallet persistida al iniciar
+  WalletProvider(this._repository, this._storageService) : _state = WalletState.loading('Starting...') {
+    // Try to load persisted wallet on start
     _loadPersistedWallet();
   }
 
@@ -24,7 +24,7 @@ class WalletProvider with ChangeNotifier {
   Future<void> _loadPersistedWallet() async {
     final wallets = await _storageService.getWalletsData();
     if (wallets.isNotEmpty) {
-      _state = WalletState.loading('Cargando wallet...');
+      _state = WalletState.loading('Loading wallet...');
       notifyListeners();
       
       try {
@@ -42,7 +42,7 @@ class WalletProvider with ChangeNotifier {
         fetchBalance();
         fetchActivities();
       } catch (e) {
-        debugPrint('Error al cargar wallet persistida: $e');
+        debugPrint('Error loading persisted wallet: $e');
         _state = WalletState.initial();
         notifyListeners();
       }
@@ -53,7 +53,7 @@ class WalletProvider with ChangeNotifier {
   }
 
   Future<(WalletEntity, String)?> generateNewWalletData() async {
-    // Generación local instantánea
+    // Instant local generation
     try {
       final String mnemonics = AptosAccount.generateMnemonic();
       final account = AptosAccount.generateAccount(mnemonics);
@@ -67,10 +67,10 @@ class WalletProvider with ChangeNotifier {
   }
 
   Future<void> finalizeWalletCreation(WalletEntity wallet, String mnemonics, {String? name}) async {
-    _state = _state.copyWith(isLoading: true, loadingMessage: 'Finalizando configuración...');
+    _state = _state.copyWith(isLoading: true, loadingMessage: 'Finalizing setup...');
     notifyListeners();
     try {
-      // Registrar en la cadena (faucet) y persistir
+      // Register on-chain (faucet) and persist
       await _repository.registerOnChain(wallet.privateKey); 
       
       await _storageService.addWalletData(
@@ -124,7 +124,7 @@ class WalletProvider with ChangeNotifier {
     final wallets = await _storageService.getWalletsData();
     final data = wallets.firstWhere((w) => w['publicAddress'] == publicAddress, orElse: () => <String, dynamic>{});
     if (data.isNotEmpty) {
-      _state = _state.copyWith(isLoading: true, loadingMessage: 'Cambiando wallet...');
+      _state = _state.copyWith(isLoading: true, loadingMessage: 'Switching wallet...');
       notifyListeners();
       
       try {
@@ -145,7 +145,7 @@ class WalletProvider with ChangeNotifier {
   }
 
   Future<bool> removeWallet(String publicAddress) async {
-    _state = _state.copyWith(isLoading: true, loadingMessage: 'Eliminando wallet...');
+    _state = _state.copyWith(isLoading: true, loadingMessage: 'Removing wallet...');
     notifyListeners();
 
     try {
@@ -179,12 +179,12 @@ class WalletProvider with ChangeNotifier {
 
   Future<double> getOtherWalletBalance(String publicAddress) async {
     try {
-      // Simplemente consultamos al repositorio el balance de esa dirección
-      // No necesitamos importar la wallet completa para ver su balance público
+      // Simply query the repository for the balance of that address
+      // No need to import the full wallet to see its public balance
       final balanceBigInt = await _repository.getBalance(publicAddress);
       return balanceBigInt / BigInt.from(100000000);
     } catch (e) {
-      debugPrint('Error obteniendo balance para $publicAddress: $e');
+      debugPrint('Error getting balance for $publicAddress: $e');
       return 0.0;
     }
   }
@@ -218,11 +218,11 @@ class WalletProvider with ChangeNotifier {
       } catch (e) {
         _state = _state.copyWith(
           isLoadingBalance: false,
-          error: 'Error al obtener balance: $e'
+          error: 'Error getting balance: $e'
         );
       }
       
-      // Intentar obtener tokens (Fungible Assets)
+      // Try to get tokens (Fungible Assets)
       try {
         final tokens = await _repository.getAccountTokens(wallet.publicAddress);
         _state = _state.copyWith(tokens: tokens);

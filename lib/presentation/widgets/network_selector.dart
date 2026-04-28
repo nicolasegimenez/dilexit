@@ -47,8 +47,8 @@ class NetworkSelector extends StatelessWidget {
           if (newNetwork != null) {
             context.read<WalletProvider>().changeNetwork(newNetwork);
             context.read<NotificationProvider>().addNotification(
-              title: 'Red Cambiada',
-              message: 'Ahora estás en ${newNetwork.displayName}',
+              title: 'Network Changed',
+              message: 'You are now on ${newNetwork.displayName}',
               type: NotificationType.info,
             );
           }

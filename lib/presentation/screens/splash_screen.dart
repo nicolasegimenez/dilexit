@@ -11,7 +11,7 @@ class SplashScreen extends StatelessWidget {
     final state = context.watch<WalletProvider>().state;
     final theme = Theme.of(context);
 
-    // Navegación automática cuando la carga inicial termina
+    // Automatic navigation when initial loading finishes
     if (!state.isLoading) {
       Future.microtask(() {
         if (context.mounted) {
@@ -46,7 +46,7 @@ class SplashScreen extends StatelessWidget {
             const CircularProgressIndicator(),
             const SizedBox(height: 24),
             Text(
-              state.loadingMessage ?? 'Iniciando...',
+              state.loadingMessage ?? 'Starting...',
               style: const TextStyle(color: Colors.white70),
             ),
           ],

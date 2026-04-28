@@ -234,7 +234,7 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (context) => _ExportKeysSheet(
         address: provider.state.wallet!.publicAddress,
         privateKey: provider.state.wallet!.privateKey,
-        mnemonics: provider.state.mnemonics ?? 'No disponible',
+        mnemonics: provider.state.mnemonics ?? 'Not available',
       ),
     );
   }
@@ -389,7 +389,7 @@ class _HomeViewState extends State<_HomeView> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Tu puerta de entrada segura al ecosistema de Aptos. Gestiona tus activos con total soberanía.',
+              'Your secure gateway to the Aptos ecosystem. Manage your assets with total sovereignty.',
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: Colors.white70,
@@ -1043,7 +1043,7 @@ class _SeedBackupSheetState extends State<_SeedBackupSheet> {
           ),
           const SizedBox(height: 12),
           const Text(
-            'Guarda estas 12 palabras en un lugar seguro. Son la única forma de recuperar tus fondos.',
+            'Save these 12 words in a safe place. They are the only way to recover your funds.',
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.white54, fontSize: 14),
           ),

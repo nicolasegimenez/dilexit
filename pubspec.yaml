@@ -104,6 +104,6 @@ flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/icon.png"
-  # Opcional: Android 8+ soporta íconos adaptativos (doble capa)
-  # adaptive_icon_background: "#000000" # o una imagen de fondo
+  # Optional: Android 8+ supports adaptive icons (double layer)
+  # adaptive_icon_background: "#000000" # or a background image
   # adaptive_icon_foreground: "assets/icon_foreground.png"

@@ -9,7 +9,7 @@ class SecureStorageService {
   
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
-  // Recupera la lista de todas las wallets
+  // Recovers the list of all wallets
   Future<List<Map<String, dynamic>>> getWalletsData() async {
     final String? listJson = await _storage.read(key: _walletsKey);
     if (listJson != null) {
@@ -17,7 +17,7 @@ class SecureStorageService {
       return list.cast<Map<String, dynamic>>();
     }
     
-    // Migración desde una sola wallet (legacy)
+    // Migration from a single wallet (legacy)
     final String? singleJson = await _storage.read(key: _walletKey);
     if (singleJson != null) {
       final data = jsonDecode(singleJson) as Map<String, dynamic>;
@@ -30,12 +30,12 @@ class SecureStorageService {
     return [];
   }
 
-  // Sobrescribe la lista completa de wallets (útil para eliminación)
+  // Overwrites the entire list of wallets (useful for deletion)
   Future<void> overwriteWallets(List<Map<String, dynamic>> wallets) async {
     await _storage.write(key: _walletsKey, value: jsonEncode(wallets));
   }
 
-  // Guarda la información de una wallet añadiéndola a la lista
+  // Saves wallet info by adding it to the list
   Future<void> addWalletData({
     required String mnemonics,
     required String publicAddress,
@@ -44,7 +44,7 @@ class SecureStorageService {
   }) async {
     final wallets = await getWalletsData();
     
-    // Evitar duplicados por dirección
+    // Avoid duplicates by address
     if (!wallets.any((w) => w['publicAddress'] == publicAddress)) {
       wallets.add({
         'mnemonics': mnemonics,
@@ -57,17 +57,17 @@ class SecureStorageService {
     await setActiveWalletAddress(publicAddress);
   }
 
-  // Obtiene la dirección de la wallet activa
+  // Gets the active wallet address
   Future<String?> getActiveWalletAddress() async {
     return await _storage.read(key: _activeWalletKey);
   }
 
-  // Establece la dirección de la wallet activa
+  // Sets the active wallet address
   Future<void> setActiveWalletAddress(String address) async {
     await _storage.write(key: _activeWalletKey, value: address);
   }
 
-  // Elimina todas las wallets
+  // Deletes all wallets
   Future<void> clearWalletsData() async {
     await _storage.delete(key: _walletsKey);
     await _storage.delete(key: _walletKey);

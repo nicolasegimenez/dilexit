@@ -35,7 +35,7 @@ class _SendScreenState extends State<SendScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Enviar APT'),
+        title: const Text('Send APT'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -57,7 +57,7 @@ class _SendScreenState extends State<SendScreen> {
                 child: Column(
                   children: [
                     Text(
-                      'Saldo disponible',
+                      'Available balance',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: Colors.white70,
                       ),
@@ -84,15 +84,15 @@ class _SendScreenState extends State<SendScreen> {
                   fontSize: 14,
                 ),
                 decoration: InputDecoration(
-                  labelText: 'Dirección de destino',
+                  labelText: 'Destination address',
                   hintText: '0x...',
                   prefixIcon: const Icon(Icons.account_balance_wallet_outlined, size: 20),
-                  helperText: 'Asegúrate de que la dirección sea correcta',
+                  helperText: 'Make sure the address is correct',
                   helperStyle: TextStyle(color: Colors.grey[600], fontSize: 11),
                 ),
                 validator: (v) {
-                  if (v == null || v.isEmpty) return 'La dirección es requerida';
-                  if (!v.startsWith('0x')) return 'Dirección inválida (debe empezar con 0x)';
+                  if (v == null || v.isEmpty) return 'Address is required';
+                  if (!v.startsWith('0x')) return 'Invalid address (must start with 0x)';
                   return null;
                 },
               ),
@@ -104,7 +104,7 @@ class _SendScreenState extends State<SendScreen> {
                 style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 decoration: InputDecoration(
-                  labelText: 'Monto a enviar',
+                  labelText: 'Amount to send',
                   hintText: '0.00',
                   prefixIcon: const Icon(Icons.monetization_on_outlined, size: 20),
                   suffixIcon: Padding(
@@ -114,16 +114,16 @@ class _SendScreenState extends State<SendScreen> {
                       style: TextButton.styleFrom(
                         visualDensity: VisualDensity.compact,
                       ),
-                      child: const Text('MÁX'),
+                      child: const Text('MAX'),
                     ),
                   ),
                 ),
                 validator: (v) {
-                  if (v == null || v.isEmpty) return 'El monto es requerido';
+                  if (v == null || v.isEmpty) return 'Amount is required';
                   final amount = double.tryParse(v);
-                  if (amount == null) return 'Monto inválido';
-                  if (amount <= 0) return 'El monto debe ser mayor a 0';
-                  if (amount > balance) return 'Saldo insuficiente';
+                  if (amount == null) return 'Invalid amount';
+                  if (amount <= 0) return 'Amount must be greater than 0';
+                  if (amount > balance) return 'Insufficient balance';
                   return null;
                 },
               ),
@@ -151,7 +151,7 @@ class _SendScreenState extends State<SendScreen> {
                                     children: [
                                       Icon(Icons.check_circle, color: Colors.white),
                                       SizedBox(width: 12),
-                                      Text('¡Transacción enviada con éxito!'),
+                                      Text('Transaction sent successfully!'),
                                     ],
                                   ),
                                   backgroundColor: Colors.green,
@@ -187,11 +187,11 @@ class _SendScreenState extends State<SendScreen> {
                             ),
                           ),
                           SizedBox(width: 12),
-                          Text('PROCESANDO...'),
+                          Text('PROCESSING...'),
                         ],
                       )
                     : const Text(
-                        'CONFIRMAR ENVÍO',
+                        'CONFIRM SEND',
                         style: TextStyle(letterSpacing: 1.2),
                       ),
               ),

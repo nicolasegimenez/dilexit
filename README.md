@@ -1,68 +1,68 @@
 # Dilexit: Flutter Aptos Wallet 🚀
 
-Dilexit es una wallet avanzada para la blockchain de Aptos desarrollada en Flutter, diseñada con una arquitectura limpia y potenciada por Inteligencia Artificial Generativa. Es un proyecto de código abierto enfocado en la seguridad, la extensibilidad y la facilidad de uso, preparado para su distribución en **F-Droid**.
+Dilexit is an advanced wallet for the Aptos blockchain developed in Flutter, designed with clean architecture and powered by Generative Artificial Intelligence. It is an open-source project focused on security, extensibility, and ease of use, ready for distribution on **F-Droid**.
 
 ## 🧠 Dilexit AI Assistant (Agentic UI)
 
-Dilexit integra un asistente de IA de última generación basado en el **GenUI SDK** y **Gemini 1.5 Flash**. A diferencia de los chatbots tradicionales, Dilexit AI es un **Agente Activo** que puede razonar e interactuar con la wallet en tiempo real.
+Dilexit integrates a state-of-the-art AI assistant based on the **GenUI SDK** and **Gemini 1.5 Flash**. Unlike traditional chatbots, Dilexit AI is an **Active Agent** that can reason and interact with the wallet in real-time.
 
-### 🛠️ Capacidades del Agente (Agentic Loop)
-El asistente utiliza un "Agentic Loop" con **Tool Calling** para realizar tareas complejas:
-*   **Consulta de Balances:** El agente puede verificar tus saldos de APT y Fungible Assets (tokens) directamente en la blockchain.
-*   **Análisis de Actividad:** Puede leer tus transacciones recientes y explicarte qué sucedió en lenguaje natural.
-*   **Gestión de Dirección:** Sabe quién eres y puede mostrarte tu dirección pública cuando la necesites.
-*   **UI Generativa (GenUI):** El agente puede responder generando widgets dinámicos (tarjetas de balance, formularios, listas) que se renderizan de forma nativa en la app.
+### 🛠️ Agent Capabilities (Agentic Loop)
+The assistant uses an "Agentic Loop" with **Tool Calling** to perform complex tasks:
+*   **Balance Inquiries:** The agent can check your APT and Fungible Assets (tokens) balances directly on the blockchain.
+*   **Activity Analysis:** It can read your recent transactions and explain what happened in natural language.
+*   **Address Management:** It knows who you are and can show your public address whenever you need it.
+*   **Generative UI (GenUI):** The agent can respond by generating dynamic widgets (balance cards, forms, lists) that are rendered natively in the app.
 
-### 🔐 Seguridad y Privacidad
-*   **Variables de Entorno:** Las llaves de API se gestionan de forma segura mediante `flutter_dotenv`.
-*   **Privacidad:** El asistente solo accede a los datos de la wallet cuando el usuario lo solicita explícitamente durante la sesión.
+### 🔐 Security and Privacy
+*   **Environment Variables:** API keys are securely managed using `flutter_dotenv`.
+*   **Privacy:** The assistant only accesses wallet data when explicitly requested by the user during the session.
 
-## 🛠️ Ecosistema MCP (Herramientas de Desarrollo)
+## 🛠️ MCP Ecosystem (Development Tools)
 
-Este proyecto utiliza el **Model Context Protocol (MCP)** para acelerar el desarrollo:
-1.  **Dart MCP Server:** Servidor oficial de Flutter/Dart para análisis profundo de código.
-2.  **Aptos Pro Tools:** Servidor personalizado en `tool/aptos_mcp_server.dart` que permite a los agentes de IA auditar contratos Move, consultar el ledger y generar keypairs de prueba.
+This project uses the **Model Context Protocol (MCP)** to accelerate development:
+1.  **Dart MCP Server:** Official Flutter/Dart server for deep code analysis.
+2.  **Aptos Pro Tools:** Custom server in `tool/aptos_mcp_server.dart` that allows AI agents to audit Move contracts, query the ledger, and generate test keypairs.
 
-## 📦 Estándares de F-Droid (FOSS Ready)
-El proyecto ha sido optimizado para cumplir con los estándares de **F-Droid**:
-*   **100% Código Abierto:** Licencia MIT.
-*   **Sin Blobs Propietarios:** No depende de servicios de Google Play o Firebase nativo. Utiliza el SDK puro de Dart para IA.
-*   **Identidad Única:** Package name configurado como `com.dilexit.wallet`.
-*   **Reproducibilidad:** Documentación clara y archivo `.env.example` para compilaciones locales.
+## 📦 F-Droid Standards (FOSS Ready)
+The project has been optimized to comply with **F-Droid** standards:
+*   **100% Open Source:** MIT License.
+*   **No Proprietary Blobs:** Does not depend on Google Play services or native Firebase. Uses the pure Dart SDK for AI.
+*   **Unique Identity:** Package name configured as `com.dilexit.wallet`.
+*   **Reproducibility:** Clear documentation and `.env.example` file for local builds.
 
-## 📂 Estructura del Proyecto
-*   `lib/domain`: Entidades y casos de uso (Arquitectura Limpia).
-*   `lib/data`: Repositorios y clientes blockchain (Aptos RPC & Indexer).
+## 📂 Project Structure
+*   `lib/domain`: Entities and use cases (Clean Architecture).
+*   `lib/data`: Repositories and blockchain clients (Aptos RPC & Indexer).
 *   `lib/presentation`: 
-    *   `providers/`: Gestión de estado con Provider.
-    *   `screens/`: Pantallas de la app, incluyendo la nueva `ai_assistant_screen.dart`.
-*   `tool/`: Herramientas de automatización y servidores MCP.
+    *   `providers/`: State management with Provider.
+    *   `screens/`: App screens, including the new `ai_assistant_screen.dart`.
+*   `tool/`: Automation tools and MCP servers.
 
-## 🚀 Configuración de Desarrollo
+## 🚀 Development Setup
 
-### Requisitos
+### Requirements
 *   Flutter SDK ^3.11.4
 *   Dart SDK ^3.11.4
-*   Gemini API Key ([Obtenla aquí](https://aistudio.google.com/app/apikey))
+*   Gemini API Key ([Get it here](https://aistudio.google.com/app/apikey))
 
-### Instalación
-1.  Clona el repositorio.
-2.  Copia el archivo de ejemplo de variables de entorno:
+### Installation
+1.  Clone the repository.
+2.  Copy the environment variables example file:
     ```bash
     cp .env.example .env
     ```
-3.  Edita `.env` y pega tu `GEMINI_API_KEY`.
-4.  Instala las dependencias:
+3.  Edit `.env` and paste your `GEMINI_API_KEY`.
+4.  Install dependencies:
     ```bash
     flutter pub get
     ```
-5.  Ejecuta la aplicación:
+5.  Run the application:
     ```bash
     flutter run
     ```
 
-## 📜 Licencia
-Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
+## 📜 License
+This project is under the MIT License. See the [LICENSE](LICENSE) file for more details.
 
 ---
-*Desarrollado con ❤️ para el ecosistema Aptos y la comunidad de software libre.*
+*Developed with ❤️ for the Aptos ecosystem and the free software community.*

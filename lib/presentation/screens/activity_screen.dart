@@ -14,7 +14,7 @@ class ActivityScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Actividad', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const Text('Activity', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.black,
         elevation: 0,
         actions: [
@@ -41,7 +41,7 @@ class ActivityScreen extends StatelessWidget {
             Icon(Icons.swap_horizontal_circle_outlined, size: 60, color: Colors.white.withValues(alpha: 0.2)),
             const SizedBox(height: 16),
             const Text(
-              'No hay transacciones todavía',
+              'No transactions yet',
               style: TextStyle(color: Colors.grey, fontSize: 16),
             ),
           ],
@@ -99,11 +99,11 @@ class _ActivityTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isDeposit ? 'Recibido' : 'Enviado',
+                  isDeposit ? 'Received' : 'Sent',
                   style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  'Ver: ${activity.transactionVersion}',
+                  'Version: ${activity.transactionVersion}',
                   style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 12),
                 ),
               ],
@@ -120,7 +120,7 @@ class _ActivityTile extends StatelessWidget {
                 ),
               ),
               Text(
-                activity.isTransactionSuccess ? 'Éxito' : 'Fallido',
+                activity.isTransactionSuccess ? 'Success' : 'Failed',
                 style: TextStyle(
                   color: activity.isTransactionSuccess ? Colors.grey : Colors.redAccent,
                   fontSize: 10,

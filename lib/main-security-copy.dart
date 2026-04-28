@@ -5,12 +5,12 @@ import 'models/sovereign_user.dart';
 import 'constants/network.dart';
 
 void main() {
-  // runApp es el puente entre el motor de Flutter y tu árbol de widgets
-  runApp(const MiHolaMundo());
+  // runApp is the bridge between the Flutter engine and your widget tree
+  runApp(const MyHelloWorld());
 }
 
-class MiHolaMundo extends StatelessWidget {
-  const MiHolaMundo({super.key});
+class MyHelloWorld extends StatelessWidget {
+  const MyHelloWorld({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -105,7 +105,7 @@ class _HomePageState extends State<HomePage> {
       builder: (dialogContext) => AlertDialog(
         backgroundColor: Colors.grey[900],
         title: const Text(
-          'Importar Semilla',
+          'Import Seed',
           style: TextStyle(color: Colors.greenAccent),
         ),
         content: Form(
@@ -115,7 +115,7 @@ class _HomePageState extends State<HomePage> {
             maxLines: 3,
             style: const TextStyle(color: Colors.white, fontFamily: 'monospace'),
             decoration: InputDecoration(
-              hintText: 'Ingresa tus 12 palabras separadas por espacios',
+              hintText: 'Enter your 12 words separated by spaces',
               hintStyle: TextStyle(color: Colors.grey[500]),
               enabledBorder: OutlineInputBorder(
                 borderSide: BorderSide(color: Colors.greenAccent.withValues(alpha: 0.5)),
@@ -136,11 +136,11 @@ class _HomePageState extends State<HomePage> {
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Por favor ingresa tu frase semilla';
+                return 'Please enter your seed phrase';
               }
-              final palabras = value.trim().split(RegExp(r'\s+'));
-              if (palabras.length != 12) {
-                return 'La frase debe tener exactamente 12 palabras';
+              final words = value.trim().split(RegExp(r'\s+'));
+              if (words.length != 12) {
+                return 'The phrase must have exactly 12 words';
               }
               return null;
             },
@@ -150,7 +150,7 @@ class _HomePageState extends State<HomePage> {
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
             child: const Text(
-              'Cancelar',
+              'Cancel',
               style: TextStyle(color: Colors.grey),
             ),
           ),
@@ -181,7 +181,7 @@ class _HomePageState extends State<HomePage> {
                 }
               }
             },
-            child: const Text('Importar'),
+            child: const Text('Import'),
           ),
         ],
       ),
@@ -226,7 +226,7 @@ class _HomePageState extends State<HomePage> {
               const CircularProgressIndicator(color: Colors.greenAccent),
               const SizedBox(height: 15),
               Text(
-                'Creando wallet...',
+                'Creating wallet...',
                 style: TextStyle(color: Colors.white, fontSize: 14),
               ),
             ] else
@@ -243,7 +243,7 @@ class _HomePageState extends State<HomePage> {
                     return null;
                   }),
                 ),
-                child: const Text('Crear Wallet'),
+                child: const Text('Create Wallet'),
                 onPressed: _createWallet,
               ),
             const SizedBox(height: 15),
@@ -260,13 +260,13 @@ class _HomePageState extends State<HomePage> {
                   return null;
                 }),
               ),
-              child: const Text('Importar Semilla'),
+              child: const Text('Import Seed'),
               onPressed: _importSeed,
             ),
             if (_user != null) ...[
               const SizedBox(height: 30),
               Text(
-                'Tu Identidad Soberana',
+                'Your Sovereign Identity',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -274,7 +274,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               const SizedBox(height: 20),
-              CajaMnemotecnica(fraseSemilla: _mnemonics!),
+              MnemonicBox(seedPhrase: _mnemonics!),
               const SizedBox(height: 30),
               // Balance card
               Container(
@@ -317,7 +317,7 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 20),
               Text(
-                'Dirección:',
+                'Address:',
                 style: TextStyle(color: Colors.white, fontSize: 16),
               ),
               const SizedBox(height: 10),
@@ -335,7 +335,7 @@ class _HomePageState extends State<HomePage> {
                 onPressed: _account != null ? () => _fetchBalance(_account!) : null,
                 icon: const Icon(Icons.refresh, color: Colors.greenAccent, size: 18),
                 label: const Text(
-                  'Actualizar balance',
+                  'Update balance',
                   style: TextStyle(color: Colors.greenAccent),
                 ),
               ),
@@ -348,14 +348,14 @@ class _HomePageState extends State<HomePage> {
 }
 }
 
-class CajaMnemotecnica extends StatelessWidget {
-  final String fraseSemilla;
+class MnemonicBox extends StatelessWidget {
+  final String seedPhrase;
 
-  const CajaMnemotecnica({super.key, required this.fraseSemilla});
+  const MnemonicBox({super.key, required this.seedPhrase});
 
   @override
   Widget build(BuildContext context) {
-    final palabras = fraseSemilla.split(' ');
+    final words = seedPhrase.split(' ');
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -371,7 +371,7 @@ class CajaMnemotecnica extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             alignment: WrapAlignment.center,
-            children: palabras.asMap().entries.map((entry) {
+            children: words.asMap().entries.map((entry) {
               return Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 10,
@@ -398,10 +398,10 @@ class CajaMnemotecnica extends StatelessWidget {
           const SizedBox(height: 16),
           TextButton.icon(
             onPressed: () {
-              Clipboard.setData(ClipboardData(text: fraseSemilla));
+              Clipboard.setData(ClipboardData(text: seedPhrase));
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: const Text('Frase copiada al portapapeles'),
+                  content: const Text('Phrase copied to clipboard'),
                   backgroundColor: Colors.greenAccent.withValues(alpha: 0.8),
                   duration: const Duration(seconds: 2),
                 ),
@@ -409,7 +409,7 @@ class CajaMnemotecnica extends StatelessWidget {
             },
             icon: const Icon(Icons.copy, color: Colors.greenAccent, size: 18),
             label: const Text(
-              'Copiar frase',
+              'Copy phrase',
               style: TextStyle(color: Colors.greenAccent),
             ),
           ),

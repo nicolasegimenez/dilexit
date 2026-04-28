@@ -31,11 +31,10 @@ class SettingsScreen extends StatelessWidget {
               leading: const Icon(Icons.language, color: Colors.blueAccent),
               title: Text(l10n.translate('language'), style: const TextStyle(color: Colors.white)),
               trailing: DropdownButton<String>(
-                value: currentLocale.languageCode,
+                value: 'en',
                 dropdownColor: Colors.grey[900],
                 underline: const SizedBox(),
                 items: const [
-                  DropdownMenuItem(value: 'es', child: Text('Español', style: TextStyle(color: Colors.white))),
                   DropdownMenuItem(value: 'en', child: Text('English', style: TextStyle(color: Colors.white))),
                 ],
                 onChanged: (String? code) {
@@ -115,7 +114,7 @@ class SettingsScreen extends StatelessWidget {
                         onPressed: () {
                           Navigator.pop(ctx);
                           walletProvider.logout();
-                          // Opcional: Redirigir explícitamente si el provider no lo hace
+                          // Optional: Explicitly redirect if the provider doesn't
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.redAccent,

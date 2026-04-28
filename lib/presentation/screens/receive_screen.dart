@@ -12,7 +12,7 @@ class ReceiveScreen extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Recibir APT')),
+      appBar: AppBar(title: const Text('Receive APT')),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -20,7 +20,7 @@ class ReceiveScreen extends StatelessWidget {
             const SizedBox(height: 40),
             const Icon(Icons.account_balance_wallet_outlined, size: 80, color: Colors.greenAccent),
             const SizedBox(height: 40),
-            const Text('Tu dirección pública', style: TextStyle(color: Colors.grey)),
+            const Text('Your public address', style: TextStyle(color: Colors.grey)),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(16),
@@ -29,7 +29,7 @@ class ReceiveScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: SelectableText(
-                wallet?.publicAddress ?? 'Cargando...',
+                wallet?.publicAddress ?? 'Loading...',
                 style: const TextStyle(color: Colors.white, fontFamily: 'monospace', fontSize: 13),
                 textAlign: TextAlign.center,
               ),
@@ -40,12 +40,12 @@ class ReceiveScreen extends StatelessWidget {
                 if (wallet != null) {
                   Clipboard.setData(ClipboardData(text: wallet.publicAddress));
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Dirección copiada')),
+                    const SnackBar(content: Text('Address copied')),
                   );
                 }
               },
               icon: const Icon(Icons.copy),
-              label: const Text('Copiar Dirección'),
+              label: const Text('Copy Address'),
             ),
           ],
         ),
