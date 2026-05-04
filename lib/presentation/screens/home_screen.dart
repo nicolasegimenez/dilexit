@@ -15,6 +15,8 @@ import 'package:dilexit/models/token_balance.dart';
 import 'package:dilexit/domain/wallet_entity.dart';
 import 'package:dilexit/l10n/app_localizations.dart';
 import 'package:dilexit/constants/network.dart';
+import 'package:dilexit/presentation/screens/pin_setup_screen.dart';
+import 'package:dilexit/presentation/providers/auth_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -242,6 +244,39 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final walletState = context.watch<WalletProvider>().state;
+    final wallet = walletState.wallet;
+
+    // If wallet is null, we show the onboarding view without the bottom bar
+    if (wallet == null) {
+      return Scaffold(
+        backgroundColor: Colors.black,
+        body: SafeArea(
+          child: Stack(
+            children: [
+              const _HomeView(),
+              if (walletState.isLoading)
+                Container(
+                  color: Colors.black87,
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const CircularProgressIndicator(color: Colors.greenAccent),
+                        const SizedBox(height: 16),
+                        Text(
+                          walletState.loadingMessage ?? 'Loading...',
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       key: _scaffoldKey,
@@ -400,23 +435,33 @@ class _HomeViewState extends State<_HomeView> {
             ElevatedButton(
               onPressed: _isCreating 
                 ? null 
-                : () async {
-                  setState(() => _isCreating = true);
-                  final result = await provider.generateNewWalletData();
-                  setState(() => _isCreating = false);
-                  
-                  if (result != null && context.mounted) {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      builder: (context) => _SeedBackupSheet(
-                        wallet: result.$1,
-                        mnemonics: result.$2,
+                : () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => PinSetupScreen(
+                          onSuccess: () async {
+                            Navigator.pop(context); // close PinSetupScreen
+                            setState(() => _isCreating = true);
+                            final result = await provider.generateNewWalletData();
+                            setState(() => _isCreating = false);
+                            
+                            if (result != null && context.mounted) {
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                backgroundColor: Colors.transparent,
+                                builder: (context) => _SeedBackupSheet(
+                                  wallet: result.$1,
+                                  mnemonics: result.$2,
+                                ),
+                              );
+                            }
+                          },
+                        ),
                       ),
                     );
-                  }
-                },
+                  },
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size.fromHeight(60),
                 shape: RoundedRectangleBorder(
@@ -804,11 +849,24 @@ class _ImportWalletSheetState extends State<_ImportWalletSheet> {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    context.read<WalletProvider>().importWallet(
-                      _mnemonicController.text.trim(),
-                      name: _nameController.text.trim(),
+                    final mnemonics = _mnemonicController.text.trim();
+                    final name = _nameController.text.trim();
+                    
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => PinSetupScreen(
+                          onSuccess: () {
+                            Navigator.pop(context); // close pin setup
+                            context.read<WalletProvider>().importWallet(
+                              mnemonics,
+                              name: name,
+                            );
+                            Navigator.pop(context); // close bottom sheet
+                          },
+                        ),
+                      ),
                     );
-                    Navigator.pop(context);
                   }
                 },
                 style: ElevatedButton.styleFrom(

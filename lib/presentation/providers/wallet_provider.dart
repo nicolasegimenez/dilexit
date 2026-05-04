@@ -1,5 +1,6 @@
 // Presentation layer - State Management
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:aptos/aptos.dart';
 import 'package:dilexit/data/wallet_repository.dart';
 import 'package:dilexit/data/secure_storage_service.dart';
@@ -36,9 +37,19 @@ class WalletProvider with ChangeNotifier {
           activeData = wallets.firstWhere((w) => w['publicAddress'] == activeAddress, orElse: () => wallets.last);
         }
         
-        final wallet = await _repository.importWallet(activeData['mnemonics']);
-        _state = WalletState.loaded(wallet, activeData['mnemonics']).copyWith(savedWallets: wallets);
+        // Derive keys locally without blocking network calls
+        final mnemonics = activeData['mnemonics'];
+        final (String a, String p) = await compute(WalletRepository.importWalletTask, mnemonics);
+
+        final wallet = WalletEntity(
+          privateKey: p,
+          publicAddress: a,
+          balance: BigInt.zero,
+        );
+        
+        _state = WalletState.loaded(wallet, mnemonics).copyWith(savedWallets: wallets);
         notifyListeners();
+        
         fetchBalance();
         fetchActivities();
       } catch (e) {
@@ -53,12 +64,17 @@ class WalletProvider with ChangeNotifier {
   }
 
   Future<(WalletEntity, String)?> generateNewWalletData() async {
-    // Instant local generation
+    // CPU-intensive generation moved to isolate
     try {
-      final String mnemonics = AptosAccount.generateMnemonic();
-      final account = AptosAccount.generateAccount(mnemonics);
-      final wallet = WalletEntity.zero(account);
-      return (wallet, mnemonics);
+      final (String m, String a, String p) = await compute(WalletRepository.generateNewWalletTask, null);
+      
+      final wallet = WalletEntity(
+        privateKey: p,
+        publicAddress: a,
+        balance: BigInt.zero,
+      );
+      
+      return (wallet, m);
     } catch (e) {
       _state = _state.copyWith(error: e.toString());
       notifyListeners();
@@ -70,8 +86,12 @@ class WalletProvider with ChangeNotifier {
     _state = _state.copyWith(isLoading: true, loadingMessage: 'Finalizing setup...');
     notifyListeners();
     try {
-      // Register on-chain (faucet) and persist
-      await _repository.registerOnChain(wallet.privateKey); 
+      // Register on-chain (faucet) but don't block if it fails
+      try {
+        await _repository.registerOnChain(wallet.privateKey); 
+      } catch (e) {
+        debugPrint('Faucet funding failed: $e');
+      }
       
       await _storageService.addWalletData(
         mnemonics: mnemonics,
@@ -99,8 +119,14 @@ class WalletProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      await Future.delayed(const Duration(milliseconds: 500));
-      final wallet = await _repository.importWallet(mnemonics);
+      // Offload import task to isolate
+      final (String a, String p) = await compute(WalletRepository.importWalletTask, mnemonics);
+
+      final wallet = WalletEntity(
+        privateKey: p,
+        publicAddress: a,
+        balance: BigInt.zero,
+      );
       
       await _storageService.addWalletData(
         mnemonics: mnemonics,
@@ -110,8 +136,10 @@ class WalletProvider with ChangeNotifier {
       );
 
       final wallets = await _storageService.getWalletsData();
+      
       _state = WalletState.loaded(wallet, mnemonics).copyWith(savedWallets: wallets);
       notifyListeners();
+      
       fetchBalance();
       fetchActivities();
     } catch (e) {
@@ -129,9 +157,19 @@ class WalletProvider with ChangeNotifier {
       
       try {
         await _storageService.setActiveWalletAddress(publicAddress);
-        final wallet = await _repository.importWallet(data['mnemonics']);
-        _state = WalletState.loaded(wallet, data['mnemonics']).copyWith(savedWallets: wallets);
+        
+        final mnemonics = data['mnemonics'];
+        final (String a, String p) = await compute(WalletRepository.importWalletTask, mnemonics);
+
+        final wallet = WalletEntity(
+          privateKey: p,
+          publicAddress: a,
+          balance: BigInt.zero,
+        );
+
+        _state = WalletState.loaded(wallet, mnemonics).copyWith(savedWallets: wallets);
         notifyListeners();
+        
         fetchBalance();
         fetchActivities();
         return true;
@@ -189,8 +227,14 @@ class WalletProvider with ChangeNotifier {
     }
   }
 
-  void logout() async {
+  Future<void> logout() async {
+    _state = _state.copyWith(isLoading: true, loadingMessage: 'Logging out...');
+    notifyListeners();
+    
+    // Clear storage in background (it's already async)
     await _storageService.clearWalletsData();
+    
+    // Reset state
     _state = WalletState.initial();
     notifyListeners();
   }

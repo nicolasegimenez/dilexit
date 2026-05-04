@@ -4,6 +4,7 @@ import 'package:aptos/aptos.dart';
 import 'package:aptos/indexer_client.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'package:dilexit/presentation/providers/auth_provider.dart';
 import 'package:dilexit/presentation/providers/wallet_provider.dart';
 import 'package:dilexit/presentation/providers/notification_provider.dart';
 import 'package:dilexit/presentation/providers/locale_provider.dart';
@@ -13,6 +14,8 @@ import 'package:dilexit/data/secure_storage_service.dart';
 import 'package:dilexit/constants/network.dart';
 import 'package:dilexit/presentation/theme/app_theme.dart';
 import 'package:dilexit/presentation/screens/splash_screen.dart';
+import 'package:dilexit/presentation/screens/pin_login_screen.dart';
+import 'package:dilexit/presentation/screens/home_screen.dart';
 import 'package:dilexit/l10n/app_localizations.dart';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -30,6 +33,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider(storageService)),
         ChangeNotifierProvider(create: (_) => LocaleProvider(storageService)),
         ChangeNotifierProvider(create: (_) => WalletProvider(repository, storageService)),
         ChangeNotifierProvider(create: (_) => NotificationProvider()),
@@ -60,7 +64,26 @@ class MyApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: const SplashScreen(),
+      home: const AuthWrapper(),
     );
+  }
+}
+
+class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final authState = context.watch<AuthProvider>().state;
+
+    switch (authState) {
+      case AuthState.loading:
+        return const SplashScreen();
+      case AuthState.locked:
+        return const PinLoginScreen();
+      case AuthState.noWallet:
+      case AuthState.unlocked:
+        return const HomeScreen();
+    }
   }
 }
