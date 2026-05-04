@@ -1,5 +1,6 @@
 import 'package:aptos/aptos.dart';
 import 'package:aptos/indexer_client.dart';
+import 'package:aptos/faucet_client.dart';
 
 void main() async {
   final indexer = IndexerClient('https://indexer.testnet.aptoslabs.com/v1/graphql');
@@ -11,7 +12,7 @@ void main() async {
   print('Address: \${account.address}');
   
   try {
-    final faucet = FaucetClient('https://fullnode.testnet.aptoslabs.com/v1', 'https://faucet.testnet.aptoslabs.com');
+    final faucet = FaucetClient.fromClient('https://faucet.testnet.aptoslabs.com', client);
     await faucet.fundAccount(account.address, "100000000"); // 1 APT
     print('Funded account');
     

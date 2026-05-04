@@ -51,10 +51,15 @@ void main() async {
         },
       },
     ),
-    (uri, [extra]) async {
+    (uri, [dynamic extra]) async {
       final client = AptosClient("https://fullnode.testnet.aptoslabs.com/v1");
       final info = await client.getLedgerInfo();
       
+      final ledgerVersion = info['ledger_version'];
+      final chainId = info['chain_id'];
+      final blockHeight = info['block_height'];
+      final epoch = info['epoch'];
+
       return ReadResourceResult(
         contents: [
           TextResourceContents(
@@ -91,19 +96,19 @@ void main() async {
       <div class="grid">
         <div>
           <div class="label">Ledger Version</div>
-          <div class="value">${info['ledger_version']}</div>
+          <div class="value">$ledgerVersion</div>
         </div>
         <div>
           <div class="label">Chain ID</div>
-          <div class="value">${info['chain_id']}</div>
+          <div class="value">$chainId</div>
         </div>
         <div>
           <div class="label">Block Height</div>
-          <div class="value">${info['block_height']}</div>
+          <div class="value">$blockHeight</div>
         </div>
         <div>
           <div class="label">Epoch</div>
-          <div class="value">${info['epoch']}</div>
+          <div class="value">$epoch</div>
         </div>
       </div>
       
@@ -136,7 +141,7 @@ void main() async {
         },
       },
     ),
-    (args, [extra]) async {
+    (args, [dynamic extra]) async {
       return const CallToolResult(
         content: [
           TextContent(text: 'Opening visual Aptos dashboard...'),
@@ -169,11 +174,11 @@ void main() async {
       },
       required: ['address'],
     ),
-    callback: (args, [extra]) async {
+    callback: (args, [dynamic extra]) async {
       try {
-        final network = args['network'] as String? ?? 'testnet';
+        final network = args?['network'] as String? ?? 'testnet';
         final client = getClient(network);
-        final balance = await CoinClient(client).checkBalance(args['address'] as String);
+        final balance = await CoinClient(client).checkBalance(args?['address'] as String);
         final apt = balance / BigInt.from(100000000);
         return CallToolResult(
           content: [TextContent(text: 'Balance on $network: $apt APT ($balance octas)')],
@@ -188,7 +193,7 @@ void main() async {
     'aptos_generate_keypair',
     description: 'Generates a new account (Mnemonic, Private, Public, Address).',
     inputSchema: ToolInputSchema(properties: {}),
-    callback: (args, [extra]) async {
+    callback: (args, [dynamic extra]) async {
       final mnemonic = AptosAccount.generateMnemonic();
       final account = AptosAccount.generateAccount(mnemonic);
       return CallToolResult(
@@ -196,7 +201,7 @@ void main() async {
           TextContent(text: '--- NEW APTOS ACCOUNT ---\n'
                            'Address: ${account.address}\n'
                            'Mnemonic: $mnemonic\n'
-                           'Private Key: ${account.privateKey}\n'
+                           'Private Key: ${account.toPrivateKeyObject().toString()}\n'
                            'Public Key: ${account.pubKey}')
         ],
       );
@@ -208,7 +213,7 @@ void main() async {
     'long-task',
     description: 'Demonstrates progress reporting for long tasks.',
     inputSchema: ToolInputSchema(properties: {}),
-    callback: (args, [extra]) async {
+    callback: (args, [dynamic extra]) async {
       if (extra == null) {
         return const CallToolResult(
           isError: true,
@@ -255,8 +260,8 @@ void main() async {
       },
       required: ['address'],
     ),
-    callback: (args, [extra]) async {
-      final address = args['address'] as String;
+    callback: (args, [dynamic extra]) async {
+      final address = args!['address'] as String;
       final limit = args['limit'] as int? ?? 10;
       final filters = args['filters'] as Map<String, dynamic>?;
       final network = filters?['network'] as String? ?? 'testnet';
@@ -267,7 +272,7 @@ void main() async {
       // For now we return a structured log of the search attempt
       return CallToolResult(
         content: [
-          TextContent(text: 'Searching $limit events of type ${args['event_type']} for $address on $network...'),
+          TextContent(text: 'Searching $limit events of type ${args?['event_type']} for $address on $network...'),
           TextContent(text: 'Filters applied: ${jsonEncode(filters)}'),
         ],
       );
@@ -281,8 +286,9 @@ void main() async {
     'Network Status',
     ResourceTemplateRegistration('aptos://{network}/status', listCallback: null),
     null,
-    (uri, vars, [extra]) async {
-      final client = getClient(vars['network'] as String);
+    (uri, vars, [dynamic extra]) async {
+      final network = vars!['network'] as String;
+      final client = getClient(network);
       final info = await client.getLedgerInfo();
       return ReadResourceResult(
         contents: [
@@ -301,9 +307,11 @@ void main() async {
     'Account Details',
     ResourceTemplateRegistration('aptos://{network}/account/{address}', listCallback: null),
     null,
-    (uri, vars, [extra]) async {
-      final client = getClient(vars['network'] as String);
-      final account = await client.getAccount(vars['address'] as String);
+    (uri, vars, [dynamic extra]) async {
+      final network = vars!['network'] as String;
+      final address = vars['address'] as String;
+      final client = getClient(network);
+      final account = await client.getAccount(address);
       return ReadResourceResult(
         contents: [
           TextResourceContents(
@@ -321,7 +329,7 @@ void main() async {
   server.registerPrompt(
     'review-code',
     description: 'Generates a professional code review looking for quality and bugs.',
-    callback: (args, [extra]) async {
+    callback: (args, [dynamic extra]) async {
       return GetPromptResult(
         description: 'Review code for quality and best practices',
         messages: [
@@ -346,12 +354,13 @@ void main() async {
     argsSchema: {
       'code': PromptArgumentDefinition(type: String, description: 'Move code to audit', required: true),
     },
-    callback: (args, [extra]) async {
+    callback: (args, [dynamic extra]) async {
+      final code = args?['code'] as String?;
       return GetPromptResult(
         messages: [
           PromptMessage(
             role: PromptMessageRole.user,
-            content: TextContent(text: 'Please audit this Aptos Move code looking for reentrancy errors, resource management issues, or security vulnerabilities:\n\n${args['code']}'),
+            content: TextContent(text: 'Please audit this Aptos Move code looking for reentrancy errors, resource management issues, or security vulnerabilities:\n\n$code'),
           ),
         ],
       );
@@ -373,8 +382,8 @@ void main() async {
         required: false,
       ),
     },
-    callback: (args, [extra]) async {
-      final language = args['target_language'] as String;
+    callback: (args, [dynamic extra]) async {
+      final language = args!['target_language'] as String;
       final formality = args['formality'] as String? ?? 'neutral';
 
       return GetPromptResult(
@@ -402,8 +411,8 @@ void main() async {
         required: true,
       ),
     },
-    callback: (args, [extra]) async {
-      final topic = args['topic'] as String;
+    callback: (args, [dynamic extra]) async {
+      final topic = args?['topic'] as String?;
 
       return GetPromptResult(
         messages: [
@@ -440,24 +449,16 @@ void main() async {
         required: true,
       ),
     },
-    callback: (args, [extra]) async {
-      final fileUri = args['file_uri'] as String;
+    callback: (args, [dynamic extra]) async {
+      final fileUri = args?['file_uri'] as String;
 
       return GetPromptResult(
         messages: [
           PromptMessage(
             role: PromptMessageRole.user,
-            content: EmbeddedResource(
-              resource: ResourceReference(
-                uri: fileUri,
-                type: 'resource',
-              ),
-            ),
-          ),
-          PromptMessage(
-            role: PromptMessageRole.user,
             content: TextContent(
-              text: 'Please analyze this file looking for:\n'
+              text: 'Analyzing file: $fileUri\n\n'
+                  'Please analyze this file looking for:\n'
                   '- Logical structure\n'
                   '- Content quality and readability\n'
                   '- Possible improvements and optimizations',
