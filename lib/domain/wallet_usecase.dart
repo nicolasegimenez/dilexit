@@ -1,5 +1,7 @@
 import 'package:aptos/aptos.dart';
+import 'package:flutter/foundation.dart' show compute;
 import 'package:dilexit/domain/wallet_entity.dart';
+import 'package:dilexit/data/wallet_repository.dart';
 
 abstract class WalletUseCase {
   Future<WalletEntity> createWallet();
@@ -13,14 +15,15 @@ class CreateWallet implements WalletUseCase {
 
   @override
   Future<WalletEntity> createWallet() async {
-    final mnemonics = AptosAccount.generateMnemonic();
-    final account = AptosAccount.generateAccount(mnemonics);
+    final result = await compute(WalletRepository.generateNewWalletTask, null);
+    final account = AptosAccount.fromPrivateKey(result.$3);
     return WalletEntity.zero(account);
   }
 
   @override
   Future<WalletEntity> importWallet(String mnemonics) async {
-    final account = AptosAccount.generateAccount(mnemonics);
+    final result = await compute(WalletRepository.importWalletTask, mnemonics);
+    final account = AptosAccount.fromPrivateKey(result.$2);
     return WalletEntity.zero(account);
   }
 }
@@ -30,14 +33,15 @@ class ImportWallet implements WalletUseCase {
 
   @override
   Future<WalletEntity> createWallet() async {
-    final mnemonics = AptosAccount.generateMnemonic();
-    final account = AptosAccount.generateAccount(mnemonics);
+    final result = await compute(WalletRepository.generateNewWalletTask, null);
+    final account = AptosAccount.fromPrivateKey(result.$3);
     return WalletEntity.zero(account);
   }
 
   @override
   Future<WalletEntity> importWallet(String mnemonics) async {
-    final account = AptosAccount.generateAccount(mnemonics);
+    final result = await compute(WalletRepository.importWalletTask, mnemonics);
+    final account = AptosAccount.fromPrivateKey(result.$2);
     return WalletEntity.zero(account);
   }
 }

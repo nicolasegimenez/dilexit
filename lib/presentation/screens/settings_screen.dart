@@ -111,10 +111,9 @@ class SettingsScreen extends StatelessWidget {
                         ),
                       ),
                       ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
                           Navigator.pop(ctx);
-                          walletProvider.logout();
-                          // Optional: Explicitly redirect if the provider doesn't
+                          await walletProvider.logout();
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.redAccent,
