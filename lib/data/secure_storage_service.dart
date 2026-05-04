@@ -6,6 +6,7 @@ class SecureStorageService {
   static const String _walletsKey = 'aptos_wallets_data_list';
   static const String _activeWalletKey = 'aptos_active_wallet_address';
   static const String _localeKey = 'app_locale';
+  static const String _pinHashKey = 'app_pin_hash';
   
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
@@ -67,11 +68,25 @@ class SecureStorageService {
     await _storage.write(key: _activeWalletKey, value: address);
   }
 
+  // PIN Hash Management
+  Future<String?> getPinHash() async {
+    return await _storage.read(key: _pinHashKey);
+  }
+
+  Future<void> savePinHash(String hash) async {
+    await _storage.write(key: _pinHashKey, value: hash);
+  }
+
+  Future<void> deletePinHash() async {
+    await _storage.delete(key: _pinHashKey);
+  }
+
   // Deletes all wallets
   Future<void> clearWalletsData() async {
     await _storage.delete(key: _walletsKey);
     await _storage.delete(key: _walletKey);
     await _storage.delete(key: _activeWalletKey);
+    await deletePinHash();
   }
 
   // Locale management
