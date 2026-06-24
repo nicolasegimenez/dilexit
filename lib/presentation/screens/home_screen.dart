@@ -9,7 +9,6 @@ import 'package:dilexit/presentation/screens/settings_screen.dart';
 import 'package:dilexit/presentation/screens/receive_screen.dart';
 import 'package:dilexit/presentation/screens/activity_screen.dart';
 
-
 import 'package:dilexit/models/token_balance.dart';
 
 import 'package:dilexit/constants/network.dart';
@@ -31,17 +30,25 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _pages = [
     const _HomeView(),
     const ActivityScreen(),
-    const Center(child: Text('Browser', style: TextStyle(color: Colors.white))),
+    const Center(
+      child: Text('Browser', style: TextStyle(color: Colors.white)),
+    ),
     const SettingsScreen(),
   ];
 
-  void _showDeleteConfirmation(BuildContext context, String address, WalletProvider provider) {
-    
+  void _showDeleteConfirmation(
+    BuildContext context,
+    String address,
+    WalletProvider provider,
+  ) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: Colors.grey[900],
-        title: Text('Delete Wallet?', style: const TextStyle(color: Colors.white)),
+        title: Text(
+          'Delete Wallet?',
+          style: const TextStyle(color: Colors.white),
+        ),
         content: Text(
           '${'This will remove the wallet from this device. Make sure you have your seed phrase backed up.'} (${address.substring(0, 6)}...)',
           style: const TextStyle(color: Colors.white70),
@@ -49,13 +56,16 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('CANCEL', style: const TextStyle(color: Colors.white54)),
+            child: Text(
+              'CANCEL',
+              style: const TextStyle(color: Colors.white54),
+            ),
           ),
           ElevatedButton(
             onPressed: () async {
-              Navigator.pop(ctx); 
-              Navigator.pop(context); 
-              
+              Navigator.pop(ctx);
+              Navigator.pop(context);
+
               final success = await provider.removeWallet(address);
               if (success && context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -77,8 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showAccountsModal(BuildContext context) {
     final provider = context.read<WalletProvider>();
     final wallet = provider.state.wallet;
-    
-    
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.grey[900],
@@ -95,11 +104,18 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Text(
                   'Wallets',
-                  style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 20),
                 if (provider.state.savedWallets.isEmpty && wallet == null)
-                  Text('No wallets configured', style: const TextStyle(color: Colors.white70))
+                  Text(
+                    'No wallets configured',
+                    style: const TextStyle(color: Colors.white70),
+                  )
                 else
                   Flexible(
                     child: SingleChildScrollView(
@@ -108,41 +124,58 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           ...provider.state.savedWallets.map((w) {
                             final address = w['publicAddress'] as String;
-                            final isSelected = wallet != null && address == wallet.publicAddress;
+                            final isSelected =
+                                wallet != null &&
+                                address == wallet.publicAddress;
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 12),
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: isSelected 
-                                      ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
+                                  color: isSelected
+                                      ? Theme.of(context).colorScheme.primary
+                                            .withValues(alpha: 0.1)
                                       : Colors.white.withValues(alpha: 0.05),
                                   borderRadius: BorderRadius.circular(16),
-                                  border: isSelected 
-                                      ? Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3))
+                                  border: isSelected
+                                      ? Border.all(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary
+                                              .withValues(alpha: 0.3),
+                                        )
                                       : Border.all(color: Colors.white10),
                                 ),
                                 child: ListTile(
                                   onTap: () async {
                                     if (!isSelected) {
                                       Navigator.pop(context);
-                                      final success = await provider.switchWallet(address);
+                                      final success = await provider
+                                          .switchWallet(address);
                                       if (success && context.mounted) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
                                           SnackBar(
-                                            content: Text('${'copied to clipboard'} ${address.substring(0, 6)}...'),
-                                            duration: const Duration(seconds: 2),
+                                            content: Text(
+                                              '${'copied to clipboard'} ${address.substring(0, 6)}...',
+                                            ),
+                                            duration: const Duration(
+                                              seconds: 2,
+                                            ),
                                           ),
                                         );
                                       }
                                     }
                                   },
                                   leading: CircleAvatar(
-                                    backgroundColor: isSelected 
-                                        ? Theme.of(context).colorScheme.primary 
+                                    backgroundColor: isSelected
+                                        ? Theme.of(context).colorScheme.primary
                                         : Colors.white10,
                                     child: Icon(
-                                      Icons.account_balance_wallet, 
-                                      color: isSelected ? Colors.black : Colors.white70,
+                                      Icons.account_balance_wallet,
+                                      color: isSelected
+                                          ? Colors.black
+                                          : Colors.white70,
                                       size: 20,
                                     ),
                                   ),
@@ -150,27 +183,40 @@ class _HomeScreenState extends State<HomeScreen> {
                                     children: [
                                       Expanded(
                                         child: Text(
-                                          w['name'] ?? (isSelected ? 'Main Account' : 'Saved Wallet'), 
+                                          w['name'] ??
+                                              (isSelected
+                                                  ? 'Main Account'
+                                                  : 'Saved Wallet'),
                                           style: TextStyle(
-                                            color: Colors.white, 
-                                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                            color: Colors.white,
+                                            fontWeight: isSelected
+                                                ? FontWeight.bold
+                                                : FontWeight.normal,
                                           ),
                                         ),
                                       ),
                                       FutureBuilder<double>(
-                                        future: provider.getOtherWalletBalance(address),
+                                        future: provider.getOtherWalletBalance(
+                                          address,
+                                        ),
                                         builder: (context, snapshot) {
-                                          if (snapshot.connectionState == ConnectionState.waiting) {
+                                          if (snapshot.connectionState ==
+                                              ConnectionState.waiting) {
                                             return const SizedBox(
                                               width: 10,
                                               height: 10,
-                                              child: CircularProgressIndicator(strokeWidth: 1),
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 1,
+                                              ),
                                             );
                                           }
                                           return Text(
                                             '${snapshot.data?.toStringAsFixed(2) ?? '0.00'} APT',
                                             style: TextStyle(
-                                              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary
+                                                  .withValues(alpha: 0.8),
                                               fontSize: 12,
                                               fontWeight: FontWeight.bold,
                                             ),
@@ -181,11 +227,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                   subtitle: Text(
                                     '${address.substring(0, 8)}...${address.substring(address.length - 6)}',
-                                    style: const TextStyle(color: Colors.white38, fontSize: 11),
+                                    style: const TextStyle(
+                                      color: Colors.white38,
+                                      fontSize: 11,
+                                    ),
                                   ),
                                   trailing: IconButton(
-                                    icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
-                                    onPressed: () => _showDeleteConfirmation(context, address, provider),
+                                    icon: const Icon(
+                                      Icons.delete_outline,
+                                      color: Colors.redAccent,
+                                      size: 20,
+                                    ),
+                                    onPressed: () => _showDeleteConfirmation(
+                                      context,
+                                      address,
+                                      provider,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -194,31 +251,29 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                     ),
-                    ),
-                    const SizedBox(height: 12),
-                    ],
-                    ),
-                    ),
-                    );
-                    },
-                    );
-                    }
+                  ),
+                const SizedBox(height: 12),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   Future<void> _handleCreateWallet(BuildContext context) async {
     final provider = context.read<WalletProvider>();
     setState(() => _isGenerating = true);
     final result = await provider.generateNewWalletData();
     setState(() => _isGenerating = false);
-    
+
     if (result != null && context.mounted) {
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
-        builder: (context) => _SeedBackupSheet(
-          wallet: result.$1,
-          mnemonics: result.$2,
-        ),
+        builder: (context) =>
+            _SeedBackupSheet(wallet: result.$1, mnemonics: result.$2),
       );
     }
   }
@@ -241,7 +296,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    
     final walletState = context.watch<WalletProvider>().state;
     final wallet = walletState.wallet;
 
@@ -260,11 +314,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const CircularProgressIndicator(color: Colors.greenAccent),
+                        const CircularProgressIndicator(
+                          color: Colors.greenAccent,
+                        ),
                         const SizedBox(height: 16),
                         Text(
                           walletState.loadingMessage ?? 'Loading...',
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),
@@ -280,9 +339,11 @@ class _HomeScreenState extends State<HomeScreen> {
       key: _scaffoldKey,
       drawer: NavigationDrawer(
         backgroundColor: Colors.grey[900],
-        indicatorColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+        indicatorColor: Theme.of(
+          context,
+        ).colorScheme.primary.withValues(alpha: 0.2),
         onDestinationSelected: (int index) {
-          Navigator.pop(context); 
+          Navigator.pop(context);
           if (index == 0) {
             _showAccountsModal(context);
           } else if (index == 1) {
@@ -298,28 +359,48 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.fromLTRB(28, 32, 16, 10),
             child: Text(
               'Settings',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white70),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(color: Colors.white70),
             ),
           ),
           NavigationDrawerDestination(
-            label: Text('Change Wallets', style: const TextStyle(color: Colors.white)),
-            icon: const Icon(Icons.account_balance_wallet_outlined, color: Colors.white70),
-            selectedIcon: const Icon(Icons.account_balance_wallet, color: Colors.white),
+            label: Text(
+              'Change Wallets',
+              style: const TextStyle(color: Colors.white),
+            ),
+            icon: const Icon(
+              Icons.account_balance_wallet_outlined,
+              color: Colors.white70,
+            ),
+            selectedIcon: const Icon(
+              Icons.account_balance_wallet,
+              color: Colors.white,
+            ),
           ),
           const Padding(
             padding: EdgeInsets.fromLTRB(28, 16, 28, 10),
             child: Divider(color: Colors.white10),
           ),
           NavigationDrawerDestination(
-            label: Text('Create New Wallet', style: const TextStyle(color: Colors.white)),
+            label: Text(
+              'Create New Wallet',
+              style: const TextStyle(color: Colors.white),
+            ),
             icon: const Icon(Icons.add_circle_outline, color: Colors.white70),
           ),
           NavigationDrawerDestination(
-            label: Text('Import Wallet', style: const TextStyle(color: Colors.white)),
+            label: Text(
+              'Import Wallet',
+              style: const TextStyle(color: Colors.white),
+            ),
             icon: const Icon(Icons.download_rounded, color: Colors.white70),
           ),
           NavigationDrawerDestination(
-            label: Text('Export Keys', style: const TextStyle(color: Colors.white)),
+            label: Text(
+              'Export Keys',
+              style: const TextStyle(color: Colors.white),
+            ),
             icon: const Icon(Icons.vpn_key_outlined, color: Colors.white70),
           ),
           const SizedBox(height: 20),
@@ -336,7 +417,8 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Stack(
           children: [
             _pages[_selectedIndex],
-            if (context.watch<WalletProvider>().state.isLoading && context.read<WalletProvider>().state.wallet != null)
+            if (context.watch<WalletProvider>().state.isLoading &&
+                context.read<WalletProvider>().state.wallet != null)
               Container(
                 color: Colors.black54,
                 child: Center(
@@ -346,8 +428,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       const CircularProgressIndicator(),
                       const SizedBox(height: 16),
                       Text(
-                        context.read<WalletProvider>().state.loadingMessage ?? 'Cargando...',
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        context.read<WalletProvider>().state.loadingMessage ??
+                            'Cargando...',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -364,10 +450,22 @@ class _HomeScreenState extends State<HomeScreen> {
         selectedItemColor: Theme.of(context).colorScheme.primary,
         unselectedItemColor: Colors.grey,
         items: [
-          BottomNavigationBarItem(icon: const Icon(Icons.wallet_rounded), label: 'Wallet'),
-          BottomNavigationBarItem(icon: const Icon(Icons.history_rounded), label: 'History'),
-          BottomNavigationBarItem(icon: const Icon(Icons.explore_rounded), label: 'Explore'),
-          BottomNavigationBarItem(icon: const Icon(Icons.settings_rounded), label: 'Settings'),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.wallet_rounded),
+            label: 'Wallet',
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.history_rounded),
+            label: 'History',
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.explore_rounded),
+            label: 'Explore',
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.settings_rounded),
+            label: 'Settings',
+          ),
         ],
       ),
     );
@@ -389,7 +487,6 @@ class _HomeViewState extends State<_HomeView> {
     final provider = context.watch<WalletProvider>();
     final state = provider.state;
     final theme = Theme.of(context);
-    
 
     if (state.wallet == null) {
       return Container(
@@ -431,54 +528,67 @@ class _HomeViewState extends State<_HomeView> {
             ),
             const Spacer(),
             ElevatedButton(
-              onPressed: _isCreating 
-                ? null 
-                : () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => PinSetupScreen(
-                          onSuccess: () async {
-                            Navigator.pop(context); // close PinSetupScreen
-                            setState(() => _isCreating = true);
-                            final result = await provider.generateNewWalletData();
-                            setState(() => _isCreating = false);
-                            
-                            if (result != null && context.mounted) {
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                backgroundColor: Colors.transparent,
-                                builder: (context) => _SeedBackupSheet(
-                                  wallet: result.$1,
-                                  mnemonics: result.$2,
-                                ),
-                              );
-                            }
-                          },
+              onPressed: _isCreating
+                  ? null
+                  : () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => PinSetupScreen(
+                            onSuccess: () async {
+                              Navigator.pop(context); // close PinSetupScreen
+                              setState(() => _isCreating = true);
+                              final result = await provider
+                                  .generateNewWalletData();
+                              setState(() => _isCreating = false);
+
+                              if (result != null && context.mounted) {
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (context) => _SeedBackupSheet(
+                                    wallet: result.$1,
+                                    mnemonics: result.$2,
+                                  ),
+                                );
+                              }
+                            },
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size.fromHeight(60),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
               ),
-              child: _isCreating 
-                ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
-                : Text(
-                    'Create Wallet'.toUpperCase(),
-                    style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2),
-                  ),
+              child: _isCreating
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.black,
+                      ),
+                    )
+                  : Text(
+                      'Create Wallet'.toUpperCase(),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
             ),
             const SizedBox(height: 16),
             OutlinedButton(
               onPressed: () => showImportDialog(context),
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(60),
-                side: BorderSide(color: theme.colorScheme.primary.withValues(alpha: 0.5)),
+                side: BorderSide(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.5),
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -523,7 +633,10 @@ class _HomeViewState extends State<_HomeView> {
                   GestureDetector(
                     onTap: () => Scaffold.of(context).openDrawer(),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white10,
                         borderRadius: BorderRadius.circular(20),
@@ -540,10 +653,13 @@ class _HomeViewState extends State<_HomeView> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            state.currentNetwork == Network.mainnet 
-                                ? 'Aptos Mainnet' 
-                                : 'Aptos Testnet', 
-                            style: const TextStyle(color: Colors.white, fontSize: 12)
+                            state.currentNetwork == Network.mainnet
+                                ? 'Aptos Mainnet'
+                                : 'Aptos Testnet',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
                           ),
                         ],
                       ),
@@ -551,7 +667,10 @@ class _HomeViewState extends State<_HomeView> {
                   ),
                   GestureDetector(
                     onTap: () {},
-                    child: const Icon(Icons.notifications_none, color: Colors.white),
+                    child: const Icon(
+                      Icons.notifications_none,
+                      color: Colors.white,
+                    ),
                   ),
                 ],
               ),
@@ -564,12 +683,12 @@ class _HomeViewState extends State<_HomeView> {
             ),
             ActionButtons(
               onSend: () => Navigator.push(
-                context, 
-                MaterialPageRoute(builder: (_) => const SendScreen())
+                context,
+                MaterialPageRoute(builder: (_) => const SendScreen()),
               ),
               onReceive: () => Navigator.push(
-                context, 
-                MaterialPageRoute(builder: (_) => const ReceiveScreen())
+                context,
+                MaterialPageRoute(builder: (_) => const ReceiveScreen()),
               ),
             ),
             const SizedBox(height: 20),
@@ -602,7 +721,13 @@ class _HomeViewState extends State<_HomeView> {
                   children: [
                     Icon(Icons.token, color: Colors.greenAccent),
                     SizedBox(width: 16),
-                    Text('APT (Aptos)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    Text(
+                      'APT (Aptos)',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     Spacer(),
                     Text('Activo', style: TextStyle(color: Colors.grey)),
                   ],
@@ -633,7 +758,9 @@ class _TokenTile extends StatelessWidget {
       child: Row(
         children: [
           CircleAvatar(
-            backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+            backgroundColor: Theme.of(
+              context,
+            ).colorScheme.primary.withValues(alpha: 0.2),
             child: Text(
               token.symbol.isNotEmpty ? token.symbol[0] : '?',
               style: TextStyle(
@@ -649,17 +776,25 @@ class _TokenTile extends StatelessWidget {
               children: [
                 Text(
                   token.name,
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 Text(
                   token.symbol,
-                  style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 12),
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.5),
+                    fontSize: 12,
+                  ),
                 ),
               ],
             ),
           ),
           Text(
-            token.amount.toStringAsFixed(4).replaceAll(RegExp(r'([.]*0+)(?!.*\d)'), ''),
+            token.amount
+                .toStringAsFixed(4)
+                .replaceAll(RegExp(r'([.]*0+)(?!.*\d)'), ''),
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -725,7 +860,6 @@ class _ImportWalletSheetState extends State<_ImportWalletSheet> {
 
   @override
   Widget build(BuildContext context) {
-    
     final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
 
     return Container(
@@ -766,7 +900,7 @@ class _ImportWalletSheetState extends State<_ImportWalletSheet> {
                 style: const TextStyle(color: Colors.white54, fontSize: 14),
               ),
               const SizedBox(height: 24),
-              
+
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(
@@ -776,7 +910,7 @@ class _ImportWalletSheetState extends State<_ImportWalletSheet> {
                 validator: (v) => (v == null || v.isEmpty) ? 'Error' : null,
               ),
               const SizedBox(height: 20),
-              
+
               Stack(
                 alignment: Alignment.topRight,
                 children: [
@@ -789,8 +923,11 @@ class _ImportWalletSheetState extends State<_ImportWalletSheet> {
                       alignLabelWithHint: true,
                       helperText: '$_wordCount / 12',
                     ),
-                    validator: (v) => (v == null || v.trim().split(RegExp(r'\s+')).length != 12) 
-                      ? 'Error' : null,
+                    validator: (v) =>
+                        (v == null ||
+                            v.trim().split(RegExp(r'\s+')).length != 12)
+                        ? 'Error'
+                        : null,
                   ),
                   TextButton.icon(
                     onPressed: _pasteFromClipboard,
@@ -800,7 +937,7 @@ class _ImportWalletSheetState extends State<_ImportWalletSheet> {
                 ],
               ),
               const SizedBox(height: 12),
-              
+
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -809,25 +946,32 @@ class _ImportWalletSheetState extends State<_ImportWalletSheet> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.security, color: Colors.orangeAccent, size: 20),
+                    const Icon(
+                      Icons.security,
+                      color: Colors.orangeAccent,
+                      size: 20,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         'Never share your seed phrase. Anyone with it can steal your funds.',
-                        style: const TextStyle(color: Colors.orangeAccent, fontSize: 12),
+                        style: const TextStyle(
+                          color: Colors.orangeAccent,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 32),
-              
+
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     final mnemonics = _mnemonicController.text.trim();
                     final name = _nameController.text.trim();
-                    
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -870,7 +1014,6 @@ class _ExportKeysSheet extends StatelessWidget {
   });
 
   void _copyToClipboard(BuildContext context, String text, String label) {
-    
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -882,7 +1025,6 @@ class _ExportKeysSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
     return Container(
       decoration: BoxDecoration(
         color: Colors.grey[900],
@@ -907,7 +1049,11 @@ class _ExportKeysSheet extends StatelessWidget {
             const SizedBox(height: 24),
             Row(
               children: [
-                const Icon(Icons.warning_amber_rounded, color: Colors.orangeAccent, size: 28),
+                const Icon(
+                  Icons.warning_amber_rounded,
+                  color: Colors.orangeAccent,
+                  size: 28,
+                ),
                 const SizedBox(width: 12),
                 Text(
                   'Backup',
@@ -925,39 +1071,48 @@ class _ExportKeysSheet extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.redAccent.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: Colors.redAccent.withValues(alpha: 0.3),
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'DANGER!',
-                    style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      color: Colors.redAccent,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   Text(
                     'Never share your Private Key or Seed Phrase. Irreversible loss of funds may occur.',
-                    style: const TextStyle(color: Colors.redAccent, fontSize: 13),
+                    style: const TextStyle(
+                      color: Colors.redAccent,
+                      fontSize: 13,
+                    ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
-            
+
             _KeySection(
               label: 'Private Key',
               value: privateKey,
               isSensitive: true,
-              onCopy: () => _copyToClipboard(context, privateKey, 'Private Key'),
+              onCopy: () =>
+                  _copyToClipboard(context, privateKey, 'Private Key'),
             ),
             const SizedBox(height: 20),
-            
+
             _KeySection(
               label: 'Seed Phrase',
               value: mnemonics,
               isSensitive: true,
               onCopy: () => _copyToClipboard(context, mnemonics, 'Seed Phrase'),
             ),
-            
+
             const SizedBox(height: 32),
             ElevatedButton(
               onPressed: () => Navigator.pop(context),
@@ -995,7 +1150,11 @@ class _KeySection extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            color: Colors.white70,
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 8),
         Container(
@@ -1018,7 +1177,11 @@ class _KeySection extends StatelessWidget {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.copy, size: 18, color: Colors.greenAccent),
+                icon: const Icon(
+                  Icons.copy,
+                  size: 18,
+                  color: Colors.greenAccent,
+                ),
                 onPressed: onCopy,
               ),
             ],
@@ -1045,7 +1208,6 @@ class _SeedBackupSheetState extends State<_SeedBackupSheet> {
   @override
   Widget build(BuildContext context) {
     final words = widget.mnemonics.split(' ');
-    
 
     return Container(
       decoration: BoxDecoration(
@@ -1068,12 +1230,20 @@ class _SeedBackupSheetState extends State<_SeedBackupSheet> {
             ),
           ),
           const SizedBox(height: 24),
-          const Icon(Icons.security_rounded, color: Colors.greenAccent, size: 48),
+          const Icon(
+            Icons.security_rounded,
+            color: Colors.greenAccent,
+            size: 48,
+          ),
           const SizedBox(height: 16),
           Text(
             'Seed Phrase',
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 12),
           const Text(
@@ -1082,7 +1252,7 @@ class _SeedBackupSheetState extends State<_SeedBackupSheet> {
             style: TextStyle(color: Colors.white54, fontSize: 14),
           ),
           const SizedBox(height: 32),
-          
+
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -1096,7 +1266,10 @@ class _SeedBackupSheetState extends State<_SeedBackupSheet> {
               alignment: WrapAlignment.center,
               children: List.generate(words.length, (index) {
                 return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(8),
@@ -1106,12 +1279,18 @@ class _SeedBackupSheetState extends State<_SeedBackupSheet> {
                     children: [
                       Text(
                         '${index + 1}.',
-                        style: const TextStyle(color: Colors.greenAccent, fontSize: 10),
+                        style: const TextStyle(
+                          color: Colors.greenAccent,
+                          fontSize: 10,
+                        ),
                       ),
                       const SizedBox(width: 6),
                       Text(
                         words[index],
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ],
                   ),
@@ -1119,24 +1298,34 @@ class _SeedBackupSheetState extends State<_SeedBackupSheet> {
               }),
             ),
           ),
-          
+
           const SizedBox(height: 32),
           ElevatedButton(
-            onPressed: _isFinalizing 
-              ? null 
-              : () async {
-                setState(() => _isFinalizing = true);
-                await context.read<WalletProvider>().finalizeWalletCreation(widget.wallet, widget.mnemonics);
-                if (context.mounted) {
-                  Navigator.pop(context);
-                }
-              },
+            onPressed: _isFinalizing
+                ? null
+                : () async {
+                    setState(() => _isFinalizing = true);
+                    await context.read<WalletProvider>().finalizeWalletCreation(
+                      widget.wallet,
+                      widget.mnemonics,
+                    );
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                    }
+                  },
             style: ElevatedButton.styleFrom(
               minimumSize: const Size.fromHeight(60),
             ),
             child: _isFinalizing
-              ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
-              : const Text('HE GUARDADO MI FRASE SEMILLA'),
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.black,
+                    ),
+                  )
+                : const Text('HE GUARDADO MI FRASE SEMILLA'),
           ),
         ],
       ),

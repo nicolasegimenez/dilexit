@@ -9,7 +9,6 @@ import 'package:dilexit/constants/network.dart';
 import 'package:dilexit/models/wallet_activity.dart';
 import 'package:dilexit/models/token_balance.dart';
 
-
 class WalletEntity {
   final String privateKey;
   final String publicAddress;
@@ -33,7 +32,7 @@ class WalletEntity {
     );
   }
 
-  double get balanceInApt => balance / BigInt.from(100000000);
+  double get balanceInApt => balance / BigInt.from(NetworkConstants.octasPerApt);
   String get formattedBalance => '${balanceInApt.toStringAsFixed(4)} APT';
 }
 
@@ -41,7 +40,8 @@ class WalletProvider with ChangeNotifier {
   final AptosWalletClient _walletClient;
   final SecureStorageService _storageService;
 
-  WalletProvider(this._walletClient, this._storageService) : _state = WalletState.loading('Starting...') {
+  WalletProvider(this._walletClient, this._storageService)
+    : _state = WalletState.loading('Starting...') {
     // Try to load persisted wallet on start
     _loadPersistedWallet();
   }
@@ -55,29 +55,38 @@ class WalletProvider with ChangeNotifier {
     if (wallets.isNotEmpty) {
       _state = WalletState.loading('Loading wallet...');
       notifyListeners();
-      
+
       try {
-        await Future.delayed(const Duration(milliseconds: 500));
+        // ponytail: removed artificial delay YAGNI
         String? activeAddress = await _storageService.getActiveWalletAddress();
-        
+
         Map<String, dynamic> activeData = wallets.last;
         if (activeAddress != null) {
-          activeData = wallets.firstWhere((w) => w['publicAddress'] == activeAddress, orElse: () => wallets.last);
+          activeData = wallets.firstWhere(
+            (w) => w['publicAddress'] == activeAddress,
+            orElse: () => wallets.last,
+          );
         }
-        
+
         // Derive keys locally without blocking network calls
         final mnemonics = activeData['mnemonics'];
-        final (String a, String p) = await compute(_importWalletTask, mnemonics);
+        final (String a, String p) = await compute(
+          _importWalletTask,
+          mnemonics,
+        );
 
         final wallet = WalletEntity(
           privateKey: p,
           publicAddress: a,
           balance: BigInt.zero,
         );
-        
-        _state = WalletState.loaded(wallet, mnemonics).copyWith(savedWallets: wallets);
+
+        _state = WalletState.loaded(
+          wallet,
+          mnemonics,
+        ).copyWith(savedWallets: wallets);
         notifyListeners();
-        
+
         fetchBalance();
         fetchActivities();
       } catch (e) {
@@ -91,37 +100,35 @@ class WalletProvider with ChangeNotifier {
     }
   }
 
-
   static (String, String, String) _generateNewWalletTask(dynamic _) {
     final mnemonics = AptosAccount.generateMnemonic();
     final account = AptosAccount.generateAccount(mnemonics);
     return (
-      mnemonics, 
-      account.address, 
-      account.toPrivateKeyObject().privateKeyHex!
+      mnemonics,
+      account.address,
+      account.toPrivateKeyObject().privateKeyHex!,
     );
   }
 
   static (String, String) _importWalletTask(dynamic mnemonics) {
     final account = AptosAccount.generateAccount(mnemonics as String);
-    return (
-      account.address, 
-      account.toPrivateKeyObject().privateKeyHex!
-    );
+    return (account.address, account.toPrivateKeyObject().privateKeyHex!);
   }
 
   Future<(WalletEntity, String)?> generateNewWalletData() async {
-
     // CPU-intensive generation moved to isolate
     try {
-      final (String m, String a, String p) = await compute(_generateNewWalletTask, null);
-      
+      final (String m, String a, String p) = await compute(
+        _generateNewWalletTask,
+        null,
+      );
+
       final wallet = WalletEntity(
         privateKey: p,
         publicAddress: a,
         balance: BigInt.zero,
       );
-      
+
       return (wallet, m);
     } catch (e) {
       _state = _state.copyWith(error: e.toString());
@@ -130,30 +137,37 @@ class WalletProvider with ChangeNotifier {
     }
   }
 
-  Future<void> finalizeWalletCreation(WalletEntity wallet, String mnemonics, {String? name}) async {
-    _state = _state.copyWith(isLoading: true, loadingMessage: 'Finalizing setup...');
+  Future<void> finalizeWalletCreation(
+    WalletEntity wallet,
+    String mnemonics, {
+    String? name,
+  }) async {
+    _state = _state.copyWith(
+      isLoading: true,
+      loadingMessage: 'Finalizing setup...',
+    );
     notifyListeners();
     try {
       // Register on-chain (faucet) but don't block if it fails
       try {
         final account = AptosAccount.fromPrivateKey(wallet.privateKey);
-        await _walletClient.createWalletOnChain(account); 
+        await _walletClient.createWalletOnChain(account);
       } catch (e) {
         debugPrint('Faucet funding failed: $e');
       }
-      
+
       await _storageService.addWalletData(
         mnemonics: mnemonics,
         publicAddress: wallet.publicAddress,
         privateKey: wallet.privateKey,
         name: name,
       );
-      
+
       final wallets = await _storageService.getWalletsData();
-      _state = WalletState.loaded(wallet, mnemonics).copyWith(
-        savedWallets: wallets,
-        isLoading: false,
-      );
+      _state = WalletState.loaded(
+        wallet,
+        mnemonics,
+      ).copyWith(savedWallets: wallets, isLoading: false);
       notifyListeners();
       fetchBalance();
       fetchActivities();
@@ -176,7 +190,7 @@ class WalletProvider with ChangeNotifier {
         publicAddress: a,
         balance: BigInt.zero,
       );
-      
+
       await _storageService.addWalletData(
         mnemonics: mnemonics,
         publicAddress: wallet.publicAddress,
@@ -185,10 +199,13 @@ class WalletProvider with ChangeNotifier {
       );
 
       final wallets = await _storageService.getWalletsData();
-      
-      _state = WalletState.loaded(wallet, mnemonics).copyWith(savedWallets: wallets);
+
+      _state = WalletState.loaded(
+        wallet,
+        mnemonics,
+      ).copyWith(savedWallets: wallets);
       notifyListeners();
-      
+
       fetchBalance();
       fetchActivities();
     } catch (e) {
@@ -199,16 +216,25 @@ class WalletProvider with ChangeNotifier {
 
   Future<bool> switchWallet(String publicAddress) async {
     final wallets = await _storageService.getWalletsData();
-    final data = wallets.firstWhere((w) => w['publicAddress'] == publicAddress, orElse: () => <String, dynamic>{});
+    final data = wallets.firstWhere(
+      (w) => w['publicAddress'] == publicAddress,
+      orElse: () => <String, dynamic>{},
+    );
     if (data.isNotEmpty) {
-      _state = _state.copyWith(isLoading: true, loadingMessage: 'Switching wallet...');
+      _state = _state.copyWith(
+        isLoading: true,
+        loadingMessage: 'Switching wallet...',
+      );
       notifyListeners();
-      
+
       try {
         await _storageService.setActiveWalletAddress(publicAddress);
-        
+
         final mnemonics = data['mnemonics'];
-        final (String a, String p) = await compute(_importWalletTask, mnemonics);
+        final (String a, String p) = await compute(
+          _importWalletTask,
+          mnemonics,
+        );
 
         final wallet = WalletEntity(
           privateKey: p,
@@ -216,9 +242,12 @@ class WalletProvider with ChangeNotifier {
           balance: BigInt.zero,
         );
 
-        _state = WalletState.loaded(wallet, mnemonics).copyWith(savedWallets: wallets);
+        _state = WalletState.loaded(
+          wallet,
+          mnemonics,
+        ).copyWith(savedWallets: wallets);
         notifyListeners();
-        
+
         fetchBalance();
         fetchActivities();
         return true;
@@ -232,16 +261,21 @@ class WalletProvider with ChangeNotifier {
   }
 
   Future<bool> removeWallet(String publicAddress) async {
-    _state = _state.copyWith(isLoading: true, loadingMessage: 'Removing wallet...');
+    _state = _state.copyWith(
+      isLoading: true,
+      loadingMessage: 'Removing wallet...',
+    );
     notifyListeners();
 
     try {
       final wallets = await _storageService.getWalletsData();
-      final updatedWallets = wallets.where((w) => w['publicAddress'] != publicAddress).toList();
-      
+      final updatedWallets = wallets
+          .where((w) => w['publicAddress'] != publicAddress)
+          .toList();
+
       if (wallets.length != updatedWallets.length) {
         await _storageService.overwriteWallets(updatedWallets);
-        
+
         if (_state.wallet?.publicAddress == publicAddress) {
           if (updatedWallets.isNotEmpty) {
             await switchWallet(updatedWallets.first['publicAddress']);
@@ -249,7 +283,10 @@ class WalletProvider with ChangeNotifier {
             logout();
           }
         } else {
-          _state = _state.copyWith(savedWallets: updatedWallets, isLoading: false);
+          _state = _state.copyWith(
+            savedWallets: updatedWallets,
+            isLoading: false,
+          );
           notifyListeners();
         }
         return true;
@@ -269,7 +306,7 @@ class WalletProvider with ChangeNotifier {
       // Simply query the repository for the balance of that address
       // No need to import the full wallet to see its public balance
       final balanceBigInt = await _walletClient.fetchBalance(publicAddress);
-      return balanceBigInt / BigInt.from(100000000);
+      return balanceBigInt / BigInt.from(NetworkConstants.octasPerApt);
     } catch (e) {
       debugPrint('Error getting balance for $publicAddress: $e');
       return 0.0;
@@ -279,10 +316,10 @@ class WalletProvider with ChangeNotifier {
   Future<void> logout() async {
     _state = _state.copyWith(isLoading: true, loadingMessage: 'Logging out...');
     notifyListeners();
-    
+
     // Clear storage in background (it's already async)
     await _storageService.clearWalletsData();
-    
+
     // Reset state
     _state = WalletState.initial();
     notifyListeners();
@@ -290,11 +327,11 @@ class WalletProvider with ChangeNotifier {
 
   void changeNetwork(Network network) {
     if (_state.currentNetwork == network) return;
-    
+
     _state = _state.copyWith(currentNetwork: network, activities: []);
     _walletClient.updateClient(network.apiUrl, network.indexerUrl);
     notifyListeners();
-    
+
     fetchBalance();
     fetchActivities();
   }
@@ -308,22 +345,27 @@ class WalletProvider with ChangeNotifier {
       try {
         final balance = await _walletClient.fetchBalance(wallet.publicAddress);
         final updatedWallet = wallet.copyWith(balance: balance);
-        _state = _state.copyWith(wallet: updatedWallet, isLoadingBalance: false);
+        _state = _state.copyWith(
+          wallet: updatedWallet,
+          isLoadingBalance: false,
+        );
       } catch (e) {
         _state = _state.copyWith(
           isLoadingBalance: false,
-          error: 'Error getting balance: $e'
+          error: 'Error getting balance: $e',
         );
       }
-      
+
       // Try to get tokens (Fungible Assets)
       try {
-        final tokens = await _walletClient.getAccountTokens(wallet.publicAddress);
+        final tokens = await _walletClient.getAccountTokens(
+          wallet.publicAddress,
+        );
         _state = _state.copyWith(tokens: tokens);
       } catch (e) {
         debugPrint('Error fetching tokens: $e');
       }
-      
+
       notifyListeners();
     }
   }
@@ -335,8 +377,13 @@ class WalletProvider with ChangeNotifier {
       notifyListeners();
 
       try {
-        final activities = await _walletClient.getCoinActivities(wallet.publicAddress);
-        _state = _state.copyWith(activities: activities, isLoadingActivities: false);
+        final activities = await _walletClient.getCoinActivities(
+          wallet.publicAddress,
+        );
+        _state = _state.copyWith(
+          activities: activities,
+          isLoadingActivities: false,
+        );
       } catch (e) {
         _state = _state.copyWith(isLoadingActivities: false);
       }
@@ -356,13 +403,17 @@ class WalletProvider with ChangeNotifier {
     try {
       final (String _, String p) = await compute(_importWalletTask, mnemonics);
       final account = AptosAccount.fromPrivateKey(p);
-      final txHash = await _walletClient.transfer(account, receiverAddress, amount);
+      final txHash = await _walletClient.transfer(
+        account,
+        receiverAddress,
+        amount,
+      );
       _state = _state.copyWith(isTransferring: false);
       notifyListeners();
-      
+
       fetchBalance();
       fetchActivities();
-      
+
       return txHash;
     } catch (e) {
       _state = _state.copyWith(isTransferring: false, error: e.toString());
@@ -402,29 +453,30 @@ class WalletState {
   });
 
   factory WalletState.initial() => const WalletState(
-        isLoading: false,
-        isLoadingBalance: false,
-        isLoadingActivities: false,
-        isTransferring: false,
-        currentNetwork: Network.testnet,
-        activities: [],
-        tokens: [],
-        savedWallets: [],
-      );
+    isLoading: false,
+    isLoadingBalance: false,
+    isLoadingActivities: false,
+    isTransferring: false,
+    currentNetwork: Network.testnet,
+    activities: [],
+    tokens: [],
+    savedWallets: [],
+  );
 
   factory WalletState.loading(String message) => WalletState(
-        isLoading: true,
-        loadingMessage: message,
-        isLoadingBalance: false,
-        isLoadingActivities: false,
-        isTransferring: false,
-        currentNetwork: Network.testnet,
-        activities: [],
-        tokens: [],
-        savedWallets: [],
-      );
+    isLoading: true,
+    loadingMessage: message,
+    isLoadingBalance: false,
+    isLoadingActivities: false,
+    isTransferring: false,
+    currentNetwork: Network.testnet,
+    activities: [],
+    tokens: [],
+    savedWallets: [],
+  );
 
-  factory WalletState.loaded(WalletEntity wallet, String mnemonics) => WalletState(
+  factory WalletState.loaded(WalletEntity wallet, String mnemonics) =>
+      WalletState(
         isLoading: false,
         isLoadingBalance: false,
         isLoadingActivities: false,
@@ -438,16 +490,16 @@ class WalletState {
       );
 
   factory WalletState.error(String error) => WalletState(
-        isLoading: false,
-        isLoadingBalance: false,
-        isLoadingActivities: false,
-        isTransferring: false,
-        error: error,
-        currentNetwork: Network.testnet,
-        activities: [],
-        tokens: [],
-        savedWallets: [],
-      );
+    isLoading: false,
+    isLoadingBalance: false,
+    isLoadingActivities: false,
+    isTransferring: false,
+    error: error,
+    currentNetwork: Network.testnet,
+    activities: [],
+    tokens: [],
+    savedWallets: [],
+  );
 
   WalletState copyWith({
     bool? isLoading,

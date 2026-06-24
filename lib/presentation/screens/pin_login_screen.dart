@@ -11,7 +11,8 @@ class PinLoginScreen extends StatefulWidget {
   State<PinLoginScreen> createState() => _PinLoginScreenState();
 }
 
-class _PinLoginScreenState extends State<PinLoginScreen> with SingleTickerProviderStateMixin {
+class _PinLoginScreenState extends State<PinLoginScreen>
+    with SingleTickerProviderStateMixin {
   String _pin = '';
   bool _hasError = false;
   late AnimationController _shakeController;
@@ -20,10 +21,14 @@ class _PinLoginScreenState extends State<PinLoginScreen> with SingleTickerProvid
   @override
   void initState() {
     super.initState();
-    _shakeController = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
-    _shakeAnimation = Tween<double>(begin: 0, end: 24)
-        .chain(CurveTween(curve: Curves.elasticIn))
-        .animate(_shakeController);
+    _shakeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _shakeAnimation = Tween<double>(
+      begin: 0,
+      end: 24,
+    ).chain(CurveTween(curve: Curves.elasticIn)).animate(_shakeController);
   }
 
   @override
@@ -76,7 +81,10 @@ class _PinLoginScreenState extends State<PinLoginScreen> with SingleTickerProvid
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.white54),
+            ),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -97,7 +105,7 @@ class _PinLoginScreenState extends State<PinLoginScreen> with SingleTickerProvid
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return PopScope(
       canPop: false, // Prevent back button
       child: Scaffold(
@@ -107,22 +115,32 @@ class _PinLoginScreenState extends State<PinLoginScreen> with SingleTickerProvid
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Spacer(),
-              Icon(Icons.lock_outline, size: 64, color: theme.colorScheme.primary),
+              Icon(
+                Icons.lock_outline,
+                size: 64,
+                color: theme.colorScheme.primary,
+              ),
               const SizedBox(height: 24),
               const Text(
                 'Enter PIN',
-                style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 48),
-              
+
               // PIN Dots
               AnimatedBuilder(
                 animation: _shakeAnimation,
                 builder: (context, child) {
                   return Transform.translate(
                     offset: Offset(
-                      _hasError ? (12 - (_shakeAnimation.value % 24)).abs() - 12 : 0, 
-                      0
+                      _hasError
+                          ? (12 - (_shakeAnimation.value % 24)).abs() - 12
+                          : 0,
+                      0,
                     ),
                     child: child,
                   );
@@ -137,23 +155,28 @@ class _PinLoginScreenState extends State<PinLoginScreen> with SingleTickerProvid
                       height: 16,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: isFilled 
-                            ? (_hasError ? Colors.redAccent : theme.colorScheme.primary) 
+                        color: isFilled
+                            ? (_hasError
+                                  ? Colors.redAccent
+                                  : theme.colorScheme.primary)
                             : Colors.white10,
                       ),
                     );
                   }),
                 ),
               ),
-              
+
               if (_hasError)
                 const Padding(
                   padding: EdgeInsets.only(top: 16),
-                  child: Text('Incorrect PIN', style: TextStyle(color: Colors.redAccent)),
+                  child: Text(
+                    'Incorrect PIN',
+                    style: TextStyle(color: Colors.redAccent),
+                  ),
                 ),
-              
+
               const Spacer(),
-              
+
               // Numpad
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 40),
@@ -164,10 +187,10 @@ class _PinLoginScreenState extends State<PinLoginScreen> with SingleTickerProvid
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           for (int j = 1; j <= 3; j++)
-                          _NumpadButton(
-                          text: '${i * 3 + j}',
-                          onPressed: () => _onDigitPressed('${i * 3 + j}'),
-                          ),
+                            _NumpadButton(
+                              text: '${i * 3 + j}',
+                              onPressed: () => _onDigitPressed('${i * 3 + j}'),
+                            ),
                         ],
                       ),
                     Row(
@@ -219,7 +242,9 @@ class _NumpadButton extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Material(
-        color: isTransparent ? Colors.transparent : Colors.white.withValues(alpha: 0.1),
+        color: isTransparent
+            ? Colors.transparent
+            : Colors.white.withValues(alpha: 0.1),
         shape: const CircleBorder(),
         clipBehavior: Clip.hardEdge,
         child: InkWell(
@@ -232,7 +257,11 @@ class _NumpadButton extends StatelessWidget {
                   ? Icon(icon, color: Colors.white, size: 28)
                   : Text(
                       text!,
-                      style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w400),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 32,
+                        fontWeight: FontWeight.w400,
+                      ),
                     ),
             ),
           ),

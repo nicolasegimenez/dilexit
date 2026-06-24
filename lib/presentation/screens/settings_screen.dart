@@ -12,31 +12,43 @@ class SettingsScreen extends StatelessWidget {
     final currentNetwork = walletProvider.state.currentNetwork;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
+      appBar: AppBar(title: const Text('Settings')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           // Network Selector
           Card(
             color: Colors.white.withValues(alpha: 0.05),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             child: ListTile(
-              leading: const Icon(Icons.hub_outlined, color: Colors.greenAccent),
-              title: const Text('Network', style: TextStyle(color: Colors.white)),
+              leading: const Icon(
+                Icons.hub_outlined,
+                color: Colors.greenAccent,
+              ),
+              title: const Text(
+                'Network',
+                style: TextStyle(color: Colors.white),
+              ),
               trailing: DropdownButton<Network>(
                 value: currentNetwork,
                 dropdownColor: Colors.grey[900],
                 underline: const SizedBox(),
                 items: const [
                   DropdownMenuItem(
-                    value: Network.mainnet, 
-                    child: Text('Aptos Mainnet', style: TextStyle(color: Colors.white)),
+                    value: Network.mainnet,
+                    child: Text(
+                      'Aptos Mainnet',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                   DropdownMenuItem(
-                    value: Network.testnet, 
-                    child: Text('Aptos Testnet', style: TextStyle(color: Colors.white)),
+                    value: Network.testnet,
+                    child: Text(
+                      'Aptos Testnet',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                 ],
                 onChanged: (Network? net) {
@@ -48,23 +60,33 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          
+
           // Logout
           Card(
             color: Colors.white.withValues(alpha: 0.05),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             child: ListTile(
               leading: const Icon(Icons.logout, color: Colors.redAccent),
-              title: const Text('Logout', style: TextStyle(color: Colors.white)),
+              title: const Text(
+                'Logout',
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () {
                 showDialog(
                   context: context,
                   builder: (ctx) => AlertDialog(
                     backgroundColor: Colors.grey[900],
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                     title: const Row(
                       children: [
-                        Icon(Icons.warning_amber_rounded, color: Colors.redAccent),
+                        Icon(
+                          Icons.warning_amber_rounded,
+                          color: Colors.redAccent,
+                        ),
                         SizedBox(width: 12),
                         Expanded(child: Text('Logout & Wipe Data')),
                       ],

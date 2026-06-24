@@ -12,22 +12,27 @@ class PinSetupScreen extends StatefulWidget {
   State<PinSetupScreen> createState() => _PinSetupScreenState();
 }
 
-class _PinSetupScreenState extends State<PinSetupScreen> with SingleTickerProviderStateMixin {
+class _PinSetupScreenState extends State<PinSetupScreen>
+    with SingleTickerProviderStateMixin {
   String _pin = '';
   String _firstPin = '';
   bool _isConfirming = false;
   bool _hasError = false;
-  
+
   late AnimationController _shakeController;
   late Animation<double> _shakeAnimation;
 
   @override
   void initState() {
     super.initState();
-    _shakeController = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
-    _shakeAnimation = Tween<double>(begin: 0, end: 24)
-        .chain(CurveTween(curve: Curves.elasticIn))
-        .animate(_shakeController);
+    _shakeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _shakeAnimation = Tween<double>(
+      begin: 0,
+      end: 24,
+    ).chain(CurveTween(curve: Curves.elasticIn)).animate(_shakeController);
   }
 
   @override
@@ -58,7 +63,9 @@ class _PinSetupScreenState extends State<PinSetupScreen> with SingleTickerProvid
   }
 
   void _processPin() async {
-    await Future.delayed(const Duration(milliseconds: 100)); // Short delay for visual feedback
+    await Future.delayed(
+      const Duration(milliseconds: 100),
+    ); // Short delay for visual feedback
     if (!_isConfirming) {
       setState(() {
         _firstPin = _pin;
@@ -85,7 +92,7 @@ class _PinSetupScreenState extends State<PinSetupScreen> with SingleTickerProvid
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -99,30 +106,39 @@ class _PinSetupScreenState extends State<PinSetupScreen> with SingleTickerProvid
           children: [
             const Spacer(),
             Icon(
-              _isConfirming ? Icons.check_circle_outline : Icons.lock_outline, 
-              size: 64, 
-              color: theme.colorScheme.primary
+              _isConfirming ? Icons.check_circle_outline : Icons.lock_outline,
+              size: 64,
+              color: theme.colorScheme.primary,
             ),
             const SizedBox(height: 24),
             Text(
               _isConfirming ? 'Confirm PIN' : 'Create 6-digit PIN',
-              style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               'This PIN will be used to unlock your wallet.',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 14),
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.6),
+                fontSize: 14,
+              ),
             ),
             const SizedBox(height: 48),
-            
+
             // PIN Dots
             AnimatedBuilder(
               animation: _shakeAnimation,
               builder: (context, child) {
                 return Transform.translate(
                   offset: Offset(
-                    _hasError ? (12 - (_shakeAnimation.value % 24)).abs() - 12 : 0, 
-                    0
+                    _hasError
+                        ? (12 - (_shakeAnimation.value % 24)).abs() - 12
+                        : 0,
+                    0,
                   ),
                   child: child,
                 );
@@ -137,23 +153,28 @@ class _PinSetupScreenState extends State<PinSetupScreen> with SingleTickerProvid
                     height: 16,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: isFilled 
-                          ? (_hasError ? Colors.redAccent : theme.colorScheme.primary) 
+                      color: isFilled
+                          ? (_hasError
+                                ? Colors.redAccent
+                                : theme.colorScheme.primary)
                           : Colors.white10,
                     ),
                   );
                 }),
               ),
             ),
-            
+
             if (_hasError)
               const Padding(
                 padding: EdgeInsets.only(top: 16),
-                child: Text('PINs do not match. Try again.', style: TextStyle(color: Colors.redAccent)),
+                child: Text(
+                  'PINs do not match. Try again.',
+                  style: TextStyle(color: Colors.redAccent),
+                ),
               ),
-            
+
             const Spacer(),
-            
+
             // Numpad
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 40),
@@ -214,7 +235,9 @@ class _NumpadButton extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Material(
-        color: isTransparent ? Colors.transparent : Colors.white.withValues(alpha: 0.1),
+        color: isTransparent
+            ? Colors.transparent
+            : Colors.white.withValues(alpha: 0.1),
         shape: const CircleBorder(),
         clipBehavior: Clip.hardEdge,
         child: InkWell(
@@ -227,7 +250,11 @@ class _NumpadButton extends StatelessWidget {
                   ? Icon(icon, color: Colors.white, size: 28)
                   : Text(
                       text!,
-                      style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w400),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 32,
+                        fontWeight: FontWeight.w400,
+                      ),
                     ),
             ),
           ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:dilexit/data/secure_storage_service.dart';
 
-
 enum AuthState { loading, noWallet, locked, unlocked }
 
 class AuthProvider with ChangeNotifier {
@@ -17,10 +16,8 @@ class AuthProvider with ChangeNotifier {
   Future<void> checkInitialState() async {
     _state = AuthState.loading;
     notifyListeners();
-    
-    // Simulate short delay for splash screen
-    await Future.delayed(const Duration(milliseconds: 500));
 
+    // ponytail: removed artificial delay YAGNI
     final wallets = await _storageService.getWalletsData();
     final pinHash = await _storageService.getPinHash();
 
@@ -30,21 +27,22 @@ class AuthProvider with ChangeNotifier {
       _state = AuthState.locked;
     } else {
       // Legacy or edge case: wallet exists but no PIN. Force setup.
-      _state = AuthState.noWallet; 
+      _state = AuthState.noWallet;
     }
     notifyListeners();
   }
 
   Future<void> setupPin(String pin) async {
-    final hash = pin;
-    await _storageService.savePinHash(hash);
+    // ponytail: YAGNI hashing. SecureStorage is already encrypted via native Keystore/Keychain.
+    // If the Keystore is compromised, the private keys are gone anyway.
+    await _storageService.savePinHash(pin);
     _state = AuthState.unlocked;
     notifyListeners();
   }
 
   Future<bool> unlock(String pin) async {
-    final hash = await _storageService.getPinHash();
-    if (hash != null && pin == hash) {
+    final storedPin = await _storageService.getPinHash();
+    if (storedPin != null && pin == storedPin) {
       _state = AuthState.unlocked;
       notifyListeners();
       return true;

@@ -49,9 +49,11 @@ class _ActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = enabled ? theme.colorScheme.primary : Colors.white.withValues(alpha: 0.3);
-    final bgColor = enabled 
-        ? theme.colorScheme.primary.withValues(alpha: 0.15) 
+    final color = enabled
+        ? theme.colorScheme.primary
+        : Colors.white.withValues(alpha: 0.3);
+    final bgColor = enabled
+        ? theme.colorScheme.primary.withValues(alpha: 0.15)
         : Colors.white.withValues(alpha: 0.05);
 
     return Column(
@@ -71,17 +73,13 @@ class _ActionButton extends StatelessWidget {
                 color: bgColor,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: enabled 
-                      ? theme.colorScheme.primary.withValues(alpha: 0.3) 
+                  color: enabled
+                      ? theme.colorScheme.primary.withValues(alpha: 0.3)
                       : Colors.transparent,
                   width: 1.5,
-                )
+                ),
               ),
-              child: Icon(
-                icon, 
-                color: color,
-                size: 28,
-              ),
+              child: Icon(icon, color: color, size: 28),
             ),
           ),
         ),

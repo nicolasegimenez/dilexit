@@ -7,7 +7,7 @@ class SecureStorageService {
   static const String _activeWalletKey = 'aptos_active_wallet_address';
   static const String _localeKey = 'app_locale';
   static const String _pinHashKey = 'app_pin_hash';
-  
+
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   // Recovers the list of all wallets
@@ -17,7 +17,7 @@ class SecureStorageService {
       final List<dynamic> list = jsonDecode(listJson);
       return list.cast<Map<String, dynamic>>();
     }
-    
+
     // Migration from a single wallet (legacy)
     final String? singleJson = await _storage.read(key: _walletKey);
     if (singleJson != null) {
@@ -27,7 +27,7 @@ class SecureStorageService {
       await setActiveWalletAddress(data['publicAddress']);
       return list;
     }
-    
+
     return [];
   }
 
@@ -44,7 +44,7 @@ class SecureStorageService {
     String? name,
   }) async {
     final wallets = await getWalletsData();
-    
+
     // Avoid duplicates by address
     if (!wallets.any((w) => w['publicAddress'] == publicAddress)) {
       wallets.add({

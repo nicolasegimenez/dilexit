@@ -19,7 +19,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
-  
+
   final aptosClient = AptosClient(Network.testnet.apiUrl);
   final indexerClient = IndexerClient(Network.testnet.indexerUrl);
   final walletClient = AptosWalletClient(aptosClient, indexerClient);
@@ -29,7 +29,9 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider(storageService)),
-        ChangeNotifierProvider(create: (_) => WalletProvider(walletClient, storageService)),
+        ChangeNotifierProvider(
+          create: (_) => WalletProvider(walletClient, storageService),
+        ),
       ],
       child: const MyApp(),
     ),

@@ -1,18 +1,18 @@
 enum Network {
   mainnet(
-    'Mainnet', 
-    'https://api.mainnet.aptoslabs.com/v1', 
-    'https://api.mainnet.aptoslabs.com/v1/graphql'
+    'Mainnet',
+    'https://api.mainnet.aptoslabs.com/v1',
+    'https://api.mainnet.aptoslabs.com/v1/graphql',
   ),
   testnet(
-    'Testnet', 
-    'https://api.testnet.aptoslabs.com/v1', 
-    'https://api.testnet.aptoslabs.com/v1/graphql'
+    'Testnet',
+    'https://api.testnet.aptoslabs.com/v1',
+    'https://api.testnet.aptoslabs.com/v1/graphql',
   ),
   devnet(
-    'Devnet', 
-    'https://api.devnet.aptoslabs.com/v1', 
-    'https://api.devnet.aptoslabs.com/v1/graphql'
+    'Devnet',
+    'https://api.devnet.aptoslabs.com/v1',
+    'https://api.devnet.aptoslabs.com/v1/graphql',
   );
 
   final String displayName;
@@ -23,6 +23,7 @@ enum Network {
 
 class NetworkConstants {
   NetworkConstants._();
+  static const int octasPerApt = 100000000;
   static const String testnetFaucet = 'https://faucet.testnet.aptoslabs.com';
   static const String explorerUrl = 'https://explorer.aptoslabs.com';
 }

@@ -18,9 +18,16 @@ class ReceiveScreen extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 40),
-            const Icon(Icons.account_balance_wallet_outlined, size: 80, color: Colors.greenAccent),
+            const Icon(
+              Icons.account_balance_wallet_outlined,
+              size: 80,
+              color: Colors.greenAccent,
+            ),
             const SizedBox(height: 40),
-            const Text('Your public address', style: TextStyle(color: Colors.grey)),
+            const Text(
+              'Your public address',
+              style: TextStyle(color: Colors.grey),
+            ),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(16),
@@ -30,7 +37,11 @@ class ReceiveScreen extends StatelessWidget {
               ),
               child: SelectableText(
                 wallet?.publicAddress ?? 'Loading...',
-                style: const TextStyle(color: Colors.white, fontFamily: 'monospace', fontSize: 13),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'monospace',
+                  fontSize: 13,
+                ),
                 textAlign: TextAlign.center,
               ),
             ),

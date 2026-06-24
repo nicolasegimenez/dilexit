@@ -19,8 +19,8 @@ class WalletActivity {
       amount: double.tryParse(json['amount']?.toString() ?? '0') ?? 0,
       transactionVersion: json['transaction_version'] ?? 0,
       isTransactionSuccess: true,
-      timestamp: json['timestamp'] != null 
-          ? DateTime.parse(json['timestamp']) 
+      timestamp: json['timestamp'] != null
+          ? DateTime.parse(json['timestamp'])
           : DateTime.now(),
     );
   }

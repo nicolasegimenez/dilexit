@@ -23,7 +23,7 @@ class _BalanceCardState extends State<BalanceCard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     // Format balance to separate number from symbol
     String balanceText = widget.formattedBalance;
     String symbol = ' APT';
@@ -98,7 +98,9 @@ class _BalanceCardState extends State<BalanceCard> {
                             });
                           },
                           child: Icon(
-                            _obscureBalance ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                            _obscureBalance
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
                             size: 20,
                             color: Colors.white.withValues(alpha: 0.6),
                           ),
@@ -139,15 +141,19 @@ class _BalanceCardState extends State<BalanceCard> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                            ]
+                            ],
                           ],
                         ),
+                      ),
+                    const SizedBox(height: 20),
+                    // Refresh and state
+                    GestureDetector(
+                      onTap: widget.isLoading ? null : widget.onRefresh,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
                         ),
-                        const SizedBox(height: 20),
-                        // Refresh and state
-                        GestureDetector(
-                        onTap: widget.isLoading ? null : widget.onRefresh,                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
                           color: Colors.black.withValues(alpha: 0.25),
                           borderRadius: BorderRadius.circular(20),
@@ -161,7 +167,9 @@ class _BalanceCardState extends State<BalanceCard> {
                             Icon(
                               Icons.sync_rounded,
                               size: 16,
-                              color: widget.isLoading ? Colors.grey : theme.colorScheme.primary,
+                              color: widget.isLoading
+                                  ? Colors.grey
+                                  : theme.colorScheme.primary,
                             ),
                             const SizedBox(width: 8),
                             Text(

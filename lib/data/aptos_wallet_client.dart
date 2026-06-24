@@ -19,7 +19,11 @@ class AptosWalletClient {
   IndexerClient indexerClient;
   String indexerUrl;
 
-  AptosWalletClient(this.client, this.indexerClient, {this.indexerUrl = 'https://api.testnet.aptoslabs.com/v1/graphql'});
+  AptosWalletClient(
+    this.client,
+    this.indexerClient, {
+    this.indexerUrl = 'https://api.testnet.aptoslabs.com/v1/graphql',
+  });
 
   void updateClient(String apiUrl, String newIndexerUrl) {
     client = AptosClient(apiUrl);
@@ -35,14 +39,14 @@ class AptosWalletClient {
         ["0x1::aptos_coin::AptosCoin"],
         [address],
       );
-      
+
       if (balanceResp != null && balanceResp.isNotEmpty) {
         return BigInt.parse(balanceResp[0].toString());
       }
       return BigInt.zero;
     } catch (e) {
       final errorMessage = e.toString().toLowerCase();
-      if (errorMessage.contains('account not found') || 
+      if (errorMessage.contains('account not found') ||
           errorMessage.contains('resource not found') ||
           errorMessage.contains('404') ||
           errorMessage.contains('bad response') ||
@@ -60,7 +64,11 @@ class AptosWalletClient {
   }
 
   /// Transfers APT to another account
-  Future<String> transfer(AptosAccount sender, String receiverAddress, BigInt amount) async {
+  Future<String> transfer(
+    AptosAccount sender,
+    String receiverAddress,
+    BigInt amount,
+  ) async {
     try {
       final txHash = await CoinClient(client).transfer(
         sender,
@@ -75,7 +83,11 @@ class AptosWalletClient {
   }
 
   /// Fetches coin activities using the new fungible_asset_activities indexer table
-  Future<List<WalletActivity>> getCoinActivities(String address, {int limit = 20, int offset = 0}) async {
+  Future<List<WalletActivity>> getCoinActivities(
+    String address, {
+    int limit = 20,
+    int offset = 0,
+  }) async {
     try {
       final query = '''
         query GetUserFAActivities(\$address: String!, \$limit: Int, \$offset: Int) {
@@ -99,11 +111,7 @@ class AptosWalletClient {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'query': query,
-          'variables': {
-            'address': address,
-            'limit': limit,
-            'offset': offset,
-          }
+          'variables': {'address': address, 'limit': limit, 'offset': offset},
         }),
       );
 
@@ -113,7 +121,7 @@ class AptosWalletClient {
           debugPrint('GraphQL Error: ${data['errors']}');
           return [];
         }
-        
+
         final List activities = data['data']['fungible_asset_activities'] ?? [];
         return activities.map((e) => WalletActivity.fromJson(e)).toList();
       } else {
@@ -151,9 +159,7 @@ class AptosWalletClient {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'query': query,
-          'variables': {
-            'address': address,
-          }
+          'variables': {'address': address},
         }),
       );
 
@@ -163,8 +169,9 @@ class AptosWalletClient {
           debugPrint('GraphQL Error: ${data['errors']}');
           return [];
         }
-        
-        final List assets = data['data']['current_fungible_asset_balances'] ?? [];
+
+        final List assets =
+            data['data']['current_fungible_asset_balances'] ?? [];
         return assets.map((e) => TokenBalance.fromJson(e)).toList();
       } else {
         debugPrint('HTTP Error fetching tokens: ${response.statusCode}');

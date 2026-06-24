@@ -1,3 +1,4 @@
+import 'package:dilexit/constants/network.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:dilexit/presentation/providers/wallet_provider.dart';
@@ -13,6 +14,7 @@ class _SendScreenState extends State<SendScreen> {
   final _formKey = GlobalKey<FormState>();
   final _addressController = TextEditingController();
   final _amountController = TextEditingController();
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -34,9 +36,7 @@ class _SendScreenState extends State<SendScreen> {
     final double balance = provider.state.wallet?.balanceInApt ?? 0.0;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Send APT'),
-      ),
+      appBar: AppBar(title: const Text('Send APT')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Form(
@@ -74,7 +74,7 @@ class _SendScreenState extends State<SendScreen> {
                 ),
               ),
               const SizedBox(height: 32),
-              
+
               // Address Field
               TextFormField(
                 controller: _addressController,
@@ -86,27 +86,38 @@ class _SendScreenState extends State<SendScreen> {
                 decoration: InputDecoration(
                   labelText: 'Destination address',
                   hintText: '0x...',
-                  prefixIcon: const Icon(Icons.account_balance_wallet_outlined, size: 20),
+                  prefixIcon: const Icon(
+                    Icons.account_balance_wallet_outlined,
+                    size: 20,
+                  ),
                   helperText: 'Make sure the address is correct',
                   helperStyle: TextStyle(color: Colors.grey[600], fontSize: 11),
                 ),
                 validator: (v) {
                   if (v == null || v.isEmpty) return 'Address is required';
-                  if (!v.startsWith('0x')) return 'Invalid address (must start with 0x)';
+                  if (!RegExp(r'^0x[a-fA-F0-9]{64}$').hasMatch(v)) return 'Invalid address format';
                   return null;
                 },
               ),
               const SizedBox(height: 24),
-              
+
               // Amount Field
               TextFormField(
                 controller: _amountController,
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 decoration: InputDecoration(
                   labelText: 'Amount to send',
                   hintText: '0.00',
-                  prefixIcon: const Icon(Icons.monetization_on_outlined, size: 20),
+                  prefixIcon: const Icon(
+                    Icons.monetization_on_outlined,
+                    size: 20,
+                  ),
                   suffixIcon: Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: TextButton(
@@ -128,17 +139,23 @@ class _SendScreenState extends State<SendScreen> {
                 },
               ),
               const SizedBox(height: 48),
-              
+
               // Action Button
               ElevatedButton(
-                onPressed: provider.state.isTransferring
+                onPressed: (provider.state.isTransferring || _isSubmitting)
                     ? null
                     : () async {
+                        if (_isSubmitting) return;
                         if (_formKey.currentState!.validate()) {
+                          setState(() => _isSubmitting = true);
                           try {
-                            final amount = double.parse(_amountController.text.trim());
-                            final octas = BigInt.from((amount * 100000000).toInt());
-                            
+                            final amount = double.parse(
+                              _amountController.text.trim(),
+                            );
+                            final octas = BigInt.from(
+                              (amount * NetworkConstants.octasPerApt).toInt(),
+                            );
+
                             final tx = await provider.transferApt(
                               _addressController.text.trim(),
                               octas,
@@ -149,7 +166,10 @@ class _SendScreenState extends State<SendScreen> {
                                 const SnackBar(
                                   content: Row(
                                     children: [
-                                      Icon(Icons.check_circle, color: Colors.white),
+                                      Icon(
+                                        Icons.check_circle,
+                                        color: Colors.white,
+                                      ),
                                       SizedBox(width: 12),
                                       Text('Transaction sent successfully!'),
                                     ],
@@ -168,6 +188,8 @@ class _SendScreenState extends State<SendScreen> {
                                 ),
                               );
                             }
+                          } finally {
+                            if (mounted) setState(() => _isSubmitting = false);
                           }
                         }
                       },
