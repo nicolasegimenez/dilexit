@@ -41,13 +41,11 @@ dependencies:
   provider: ^6.1.5+1
   # Add dependencies for secure storage to user
   flutter_secure_storage: ^9.2.4
-  mcp_dart: ^2.1.0
   http: ^1.6.0
   flutter_dotenv: ^6.0.1
   flutter_localizations:
     sdk: flutter
   intl: ^0.20.2
-  crypto: ^3.0.7
 
 dev_dependencies:
   flutter_test:

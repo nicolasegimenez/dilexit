@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../constants/network.dart';
 import '../providers/wallet_provider.dart';
-import '../providers/notification_provider.dart';
-import '../../models/app_notification.dart';
 
 class NetworkSelector extends StatelessWidget {
   const NetworkSelector({super.key});
@@ -46,11 +44,6 @@ class NetworkSelector extends StatelessWidget {
         onChanged: (newNetwork) {
           if (newNetwork != null) {
             context.read<WalletProvider>().changeNetwork(newNetwork);
-            context.read<NotificationProvider>().addNotification(
-              title: 'Network Changed',
-              message: 'You are now on ${newNetwork.displayName}',
-              type: NotificationType.info,
-            );
           }
         },
       ),

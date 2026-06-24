@@ -6,9 +6,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'package:dilexit/presentation/providers/auth_provider.dart';
 import 'package:dilexit/presentation/providers/wallet_provider.dart';
-import 'package:dilexit/presentation/providers/notification_provider.dart';
+
 import 'package:dilexit/presentation/providers/locale_provider.dart';
-import 'package:dilexit/data/wallet_repository.dart';
+
 import 'package:dilexit/data/aptos_wallet_client.dart';
 import 'package:dilexit/data/secure_storage_service.dart';
 import 'package:dilexit/constants/network.dart';
@@ -27,7 +27,7 @@ void main() async {
   final aptosClient = AptosClient(Network.testnet.apiUrl);
   final indexerClient = IndexerClient(Network.testnet.indexerUrl);
   final walletClient = AptosWalletClient(aptosClient, indexerClient);
-  final repository = WalletRepository(walletClient);
+  
   final storageService = SecureStorageService();
 
   runApp(
@@ -35,8 +35,8 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider(storageService)),
         ChangeNotifierProvider(create: (_) => LocaleProvider(storageService)),
-        ChangeNotifierProvider(create: (_) => WalletProvider(repository, storageService)),
-        ChangeNotifierProvider(create: (_) => NotificationProvider()),
+        ChangeNotifierProvider(create: (_) => WalletProvider(walletClient, storageService)),
+        
       ],
       child: const MyApp(),
     ),

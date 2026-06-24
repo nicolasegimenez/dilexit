@@ -9,10 +9,10 @@ import 'package:dilexit/presentation/screens/send_screen.dart';
 import 'package:dilexit/presentation/screens/settings_screen.dart';
 import 'package:dilexit/presentation/screens/receive_screen.dart';
 import 'package:dilexit/presentation/screens/activity_screen.dart';
-import 'package:dilexit/presentation/screens/notifications_screen.dart';
-import 'package:dilexit/presentation/providers/notification_provider.dart';
+
+
 import 'package:dilexit/models/token_balance.dart';
-import 'package:dilexit/domain/wallet_entity.dart';
+
 import 'package:dilexit/l10n/app_localizations.dart';
 import 'package:dilexit/constants/network.dart';
 import 'package:dilexit/presentation/screens/pin_setup_screen.dart';
@@ -551,31 +551,9 @@ class _HomeViewState extends State<_HomeView> {
                       ),
                     ),
                   ),
-                  Consumer<NotificationProvider>(
-                    builder: (context, notifProvider, _) => GestureDetector(
-                      onTap: () {
-                        notifProvider.markAllAsRead();
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const NotificationsScreen()),
-                        );
-                      },
-                      child: Stack(
-                        children: [
-                          const Icon(Icons.notifications_none, color: Colors.white),
-                          if (notifProvider.unreadCount > 0)
-                            Positioned(
-                              right: 0,
-                              top: 0,
-                              child: Container(
-                                padding: const EdgeInsets.all(2),
-                                decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(6)),
-                                constraints: const BoxConstraints(minWidth: 8, minHeight: 8),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
+                  GestureDetector(
+                    onTap: () {},
+                    child: const Icon(Icons.notifications_none, color: Colors.white),
                   ),
                 ],
               ),

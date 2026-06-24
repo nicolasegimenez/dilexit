@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:dilexit/data/secure_storage_service.dart';
-import 'package:dilexit/domain/services/security_service.dart';
+
 
 enum AuthState { loading, noWallet, locked, unlocked }
 
@@ -36,7 +36,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> setupPin(String pin) async {
-    final hash = SecurityService.hashPin(pin);
+    final hash = pin;
     await _storageService.savePinHash(hash);
     _state = AuthState.unlocked;
     notifyListeners();
@@ -44,7 +44,7 @@ class AuthProvider with ChangeNotifier {
 
   Future<bool> unlock(String pin) async {
     final hash = await _storageService.getPinHash();
-    if (hash != null && SecurityService.verifyPin(pin, hash)) {
+    if (hash != null && pin == hash) {
       _state = AuthState.unlocked;
       notifyListeners();
       return true;
