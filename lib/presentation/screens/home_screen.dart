@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:dilexit/presentation/providers/wallet_provider.dart';
-import 'package:dilexit/presentation/providers/locale_provider.dart';
 import 'package:dilexit/presentation/widgets/balance_card.dart';
 import 'package:dilexit/presentation/widgets/action_buttons.dart';
 import 'package:dilexit/presentation/screens/send_screen.dart';
@@ -13,7 +12,6 @@ import 'package:dilexit/presentation/screens/activity_screen.dart';
 
 import 'package:dilexit/models/token_balance.dart';
 
-import 'package:dilexit/l10n/app_localizations.dart';
 import 'package:dilexit/constants/network.dart';
 import 'package:dilexit/presentation/screens/pin_setup_screen.dart';
 import 'package:dilexit/presentation/providers/auth_provider.dart';
@@ -38,20 +36,20 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   void _showDeleteConfirmation(BuildContext context, String address, WalletProvider provider) {
-    final l10n = AppLocalizations.of(context)!;
+    
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: Colors.grey[900],
-        title: Text(l10n.translate('delete_wallet_q'), style: const TextStyle(color: Colors.white)),
+        title: Text('Delete Wallet?', style: const TextStyle(color: Colors.white)),
         content: Text(
-          '${l10n.translate('delete_warning')} (${address.substring(0, 6)}...)',
+          '${'This will remove the wallet from this device. Make sure you have your seed phrase backed up.'} (${address.substring(0, 6)}...)',
           style: const TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text(l10n.translate('cancel'), style: const TextStyle(color: Colors.white54)),
+            child: Text('CANCEL', style: const TextStyle(color: Colors.white54)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -62,14 +60,14 @@ class _HomeScreenState extends State<HomeScreen> {
               if (success && context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(l10n.translate('wallet_deleted')),
+                    content: Text('Wallet deleted successfully'),
                     backgroundColor: Colors.redAccent,
                   ),
                 );
               }
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-            child: Text(l10n.translate('delete'), style: const TextStyle(color: Colors.white)),
+            child: Text('DELETE', style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -79,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showAccountsModal(BuildContext context) {
     final provider = context.read<WalletProvider>();
     final wallet = provider.state.wallet;
-    final l10n = AppLocalizations.of(context)!;
+    
     
     showModalBottomSheet(
       context: context,
@@ -96,12 +94,12 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  l10n.translate('wallets'),
+                  'Wallets',
                   style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 20),
                 if (provider.state.savedWallets.isEmpty && wallet == null)
-                  Text(l10n.translate('no_wallets'), style: const TextStyle(color: Colors.white70))
+                  Text('No wallets configured', style: const TextStyle(color: Colors.white70))
                 else
                   Flexible(
                     child: SingleChildScrollView(
@@ -131,7 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       if (success && context.mounted) {
                                         ScaffoldMessenger.of(context).showSnackBar(
                                           SnackBar(
-                                            content: Text('${l10n.translate('copied')} ${address.substring(0, 6)}...'),
+                                            content: Text('${'copied to clipboard'} ${address.substring(0, 6)}...'),
                                             duration: const Duration(seconds: 2),
                                           ),
                                         );
@@ -152,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     children: [
                                       Expanded(
                                         child: Text(
-                                          w['name'] ?? (isSelected ? l10n.translate('main_account') : l10n.translate('saved_wallet')), 
+                                          w['name'] ?? (isSelected ? 'Main Account' : 'Saved Wallet'), 
                                           style: TextStyle(
                                             color: Colors.white, 
                                             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -243,7 +241,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    
     final walletState = context.watch<WalletProvider>().state;
     final wallet = walletState.wallet;
 
@@ -299,12 +297,12 @@ class _HomeScreenState extends State<HomeScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(28, 32, 16, 10),
             child: Text(
-              l10n.translate('settings'),
+              'Settings',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white70),
             ),
           ),
           NavigationDrawerDestination(
-            label: Text(l10n.translate('change_wallet'), style: const TextStyle(color: Colors.white)),
+            label: Text('Change Wallets', style: const TextStyle(color: Colors.white)),
             icon: const Icon(Icons.account_balance_wallet_outlined, color: Colors.white70),
             selectedIcon: const Icon(Icons.account_balance_wallet, color: Colors.white),
           ),
@@ -313,15 +311,15 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Divider(color: Colors.white10),
           ),
           NavigationDrawerDestination(
-            label: Text(l10n.translate('create_new_wallet'), style: const TextStyle(color: Colors.white)),
+            label: Text('Create New Wallet', style: const TextStyle(color: Colors.white)),
             icon: const Icon(Icons.add_circle_outline, color: Colors.white70),
           ),
           NavigationDrawerDestination(
-            label: Text(l10n.translate('import_wallet'), style: const TextStyle(color: Colors.white)),
+            label: Text('Import Wallet', style: const TextStyle(color: Colors.white)),
             icon: const Icon(Icons.download_rounded, color: Colors.white70),
           ),
           NavigationDrawerDestination(
-            label: Text(l10n.translate('export_keys'), style: const TextStyle(color: Colors.white)),
+            label: Text('Export Keys', style: const TextStyle(color: Colors.white)),
             icon: const Icon(Icons.vpn_key_outlined, color: Colors.white70),
           ),
           const SizedBox(height: 20),
@@ -366,10 +364,10 @@ class _HomeScreenState extends State<HomeScreen> {
         selectedItemColor: Theme.of(context).colorScheme.primary,
         unselectedItemColor: Colors.grey,
         items: [
-          BottomNavigationBarItem(icon: const Icon(Icons.wallet_rounded), label: l10n.translate('wallet')),
-          BottomNavigationBarItem(icon: const Icon(Icons.history_rounded), label: l10n.translate('history')),
-          BottomNavigationBarItem(icon: const Icon(Icons.explore_rounded), label: l10n.translate('explore')),
-          BottomNavigationBarItem(icon: const Icon(Icons.settings_rounded), label: l10n.translate('settings')),
+          BottomNavigationBarItem(icon: const Icon(Icons.wallet_rounded), label: 'Wallet'),
+          BottomNavigationBarItem(icon: const Icon(Icons.history_rounded), label: 'History'),
+          BottomNavigationBarItem(icon: const Icon(Icons.explore_rounded), label: 'Explore'),
+          BottomNavigationBarItem(icon: const Icon(Icons.settings_rounded), label: 'Settings'),
         ],
       ),
     );
@@ -391,7 +389,7 @@ class _HomeViewState extends State<_HomeView> {
     final provider = context.watch<WalletProvider>();
     final state = provider.state;
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    
 
     if (state.wallet == null) {
       return Container(
@@ -471,7 +469,7 @@ class _HomeViewState extends State<_HomeView> {
               child: _isCreating 
                 ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
                 : Text(
-                    l10n.translate('create_wallet').toUpperCase(),
+                    'Create Wallet'.toUpperCase(),
                     style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2),
                   ),
             ),
@@ -486,7 +484,7 @@ class _HomeViewState extends State<_HomeView> {
                 ),
               ),
               child: Text(
-                l10n.translate('import_with_seed'),
+                'Import with Seed Phrase',
                 style: TextStyle(
                   color: theme.colorScheme.primary,
                   fontWeight: FontWeight.w600,
@@ -543,8 +541,8 @@ class _HomeViewState extends State<_HomeView> {
                           const SizedBox(width: 8),
                           Text(
                             state.currentNetwork == Network.mainnet 
-                                ? l10n.translate('mainnet') 
-                                : l10n.translate('testnet'), 
+                                ? 'Aptos Mainnet' 
+                                : 'Aptos Testnet', 
                             style: const TextStyle(color: Colors.white, fontSize: 12)
                           ),
                         ],
@@ -581,7 +579,7 @@ class _HomeViewState extends State<_HomeView> {
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    l10n.translate('your_tokens'),
+                    'Your Tokens',
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.8),
                       fontSize: 16,
@@ -727,7 +725,7 @@ class _ImportWalletSheetState extends State<_ImportWalletSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    
     final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
 
     return Container(
@@ -755,7 +753,7 @@ class _ImportWalletSheetState extends State<_ImportWalletSheet> {
               ),
               const SizedBox(height: 24),
               Text(
-                l10n.translate('import_title'),
+                'Import Wallet',
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 22,
@@ -764,7 +762,7 @@ class _ImportWalletSheetState extends State<_ImportWalletSheet> {
               ),
               const SizedBox(height: 8),
               Text(
-                l10n.translate('import_desc'),
+                'Enter your 12-word seed phrase to recover access.',
                 style: const TextStyle(color: Colors.white54, fontSize: 14),
               ),
               const SizedBox(height: 24),
@@ -772,7 +770,7 @@ class _ImportWalletSheetState extends State<_ImportWalletSheet> {
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(
-                  labelText: l10n.translate('wallet_name'),
+                  labelText: 'Wallet Name',
                   prefixIcon: const Icon(Icons.label_outline),
                 ),
                 validator: (v) => (v == null || v.isEmpty) ? 'Error' : null,
@@ -786,7 +784,7 @@ class _ImportWalletSheetState extends State<_ImportWalletSheet> {
                     controller: _mnemonicController,
                     maxLines: 4,
                     decoration: InputDecoration(
-                      labelText: l10n.translate('seed_phrase'),
+                      labelText: 'Seed Phrase',
                       hintText: 'word1 word2 word3...',
                       alignLabelWithHint: true,
                       helperText: '$_wordCount / 12',
@@ -797,7 +795,7 @@ class _ImportWalletSheetState extends State<_ImportWalletSheet> {
                   TextButton.icon(
                     onPressed: _pasteFromClipboard,
                     icon: const Icon(Icons.content_paste, size: 16),
-                    label: Text(l10n.translate('paste')),
+                    label: Text('PASTE'),
                   ),
                 ],
               ),
@@ -815,7 +813,7 @@ class _ImportWalletSheetState extends State<_ImportWalletSheet> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        l10n.translate('security_warning'),
+                        'Never share your seed phrase. Anyone with it can steal your funds.',
                         style: const TextStyle(color: Colors.orangeAccent, fontSize: 12),
                       ),
                     ),
@@ -850,7 +848,7 @@ class _ImportWalletSheetState extends State<_ImportWalletSheet> {
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size.fromHeight(56),
                 ),
-                child: Text(l10n.translate('import_wallet')),
+                child: Text('Import Wallet'),
               ),
             ],
           ),
@@ -872,11 +870,11 @@ class _ExportKeysSheet extends StatelessWidget {
   });
 
   void _copyToClipboard(BuildContext context, String text, String label) {
-    final l10n = AppLocalizations.of(context)!;
+    
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('$label ${l10n.translate('copied')}'),
+        content: Text('$label ${'copied to clipboard'}'),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -884,7 +882,7 @@ class _ExportKeysSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    
     return Container(
       decoration: BoxDecoration(
         color: Colors.grey[900],
@@ -912,7 +910,7 @@ class _ExportKeysSheet extends StatelessWidget {
                 const Icon(Icons.warning_amber_rounded, color: Colors.orangeAccent, size: 28),
                 const SizedBox(width: 12),
                 Text(
-                  l10n.translate('export_title'),
+                  'Backup',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 22,
@@ -933,11 +931,11 @@ class _ExportKeysSheet extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    l10n.translate('danger'),
+                    'DANGER!',
                     style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    l10n.translate('danger_desc'),
+                    'Never share your Private Key or Seed Phrase. Irreversible loss of funds may occur.',
                     style: const TextStyle(color: Colors.redAccent, fontSize: 13),
                   ),
                 ],
@@ -946,18 +944,18 @@ class _ExportKeysSheet extends StatelessWidget {
             const SizedBox(height: 24),
             
             _KeySection(
-              label: l10n.translate('private_key'),
+              label: 'Private Key',
               value: privateKey,
               isSensitive: true,
-              onCopy: () => _copyToClipboard(context, privateKey, l10n.translate('private_key')),
+              onCopy: () => _copyToClipboard(context, privateKey, 'Private Key'),
             ),
             const SizedBox(height: 20),
             
             _KeySection(
-              label: l10n.translate('seed_phrase'),
+              label: 'Seed Phrase',
               value: mnemonics,
               isSensitive: true,
-              onCopy: () => _copyToClipboard(context, mnemonics, l10n.translate('seed_phrase')),
+              onCopy: () => _copyToClipboard(context, mnemonics, 'Seed Phrase'),
             ),
             
             const SizedBox(height: 32),
@@ -968,7 +966,7 @@ class _ExportKeysSheet extends StatelessWidget {
                 foregroundColor: Colors.white,
                 minimumSize: const Size.fromHeight(56),
               ),
-              child: Text(l10n.translate('understand_close')),
+              child: Text('UNDERSTAND & CLOSE'),
             ),
           ],
         ),
@@ -1047,7 +1045,7 @@ class _SeedBackupSheetState extends State<_SeedBackupSheet> {
   @override
   Widget build(BuildContext context) {
     final words = widget.mnemonics.split(' ');
-    final l10n = AppLocalizations.of(context)!;
+    
 
     return Container(
       decoration: BoxDecoration(
@@ -1073,7 +1071,7 @@ class _SeedBackupSheetState extends State<_SeedBackupSheet> {
           const Icon(Icons.security_rounded, color: Colors.greenAccent, size: 48),
           const SizedBox(height: 16),
           Text(
-            l10n.translate('seed_phrase'),
+            'Seed Phrase',
             textAlign: TextAlign.center,
             style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
           ),
