@@ -11,16 +11,6 @@ class SplashScreen extends StatelessWidget {
     final state = context.watch<WalletProvider>().state;
     final theme = Theme.of(context);
 
-    // Automatic navigation when initial loading finishes
-    if (!state.isLoading) {
-      Future.microtask(() {
-        if (context.mounted) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const HomeScreen()),
-          );
-        }
-      });
-    }
 
     return Scaffold(
       body: Center(

@@ -63,9 +63,11 @@ class _PinSetupScreenState extends State<PinSetupScreen>
   }
 
   void _processPin() async {
+    final authProvider = context.read<AuthProvider>();
     await Future.delayed(
       const Duration(milliseconds: 100),
     ); // Short delay for visual feedback
+    if (!mounted) return;
     if (!_isConfirming) {
       setState(() {
         _firstPin = _pin;
@@ -74,7 +76,7 @@ class _PinSetupScreenState extends State<PinSetupScreen>
       });
     } else {
       if (_pin == _firstPin) {
-        await context.read<AuthProvider>().setupPin(_pin);
+        await authProvider.setupPin(_pin);
         widget.onSuccess();
       } else {
         HapticFeedback.heavyImpact();

@@ -13,7 +13,7 @@ import 'package:dilexit/models/token_balance.dart';
 
 import 'package:dilexit/constants/network.dart';
 import 'package:dilexit/presentation/screens/pin_setup_screen.dart';
-import 'package:dilexit/presentation/providers/auth_provider.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -25,14 +25,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int _selectedIndex = 0;
-  bool _isGenerating = false;
+
 
   final List<Widget> _pages = [
     const _HomeView(),
     const ActivityScreen(),
-    const Center(
-      child: Text('Browser', style: TextStyle(color: Colors.white)),
-    ),
     const SettingsScreen(),
   ];
 
@@ -263,9 +260,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _handleCreateWallet(BuildContext context) async {
     final provider = context.read<WalletProvider>();
-    setState(() => _isGenerating = true);
+
     final result = await provider.generateNewWalletData();
-    setState(() => _isGenerating = false);
+
 
     if (result != null && context.mounted) {
       showModalBottomSheet(
@@ -457,10 +454,6 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(
             icon: const Icon(Icons.history_rounded),
             label: 'History',
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.explore_rounded),
-            label: 'Explore',
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.settings_rounded),

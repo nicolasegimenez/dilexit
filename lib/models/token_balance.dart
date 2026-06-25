@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 class TokenBalance {
   final String assetType;
   final double amount;
@@ -18,14 +19,8 @@ class TokenBalance {
     final decimals = metadata['decimals'] ?? 8; // Default 8 (like APT)
     final rawAmount = double.tryParse(json['amount']?.toString() ?? '0') ?? 0;
 
-    // Format the amount by dividing by the number of decimals
-    // Note: math.pow is not available without importing dart:math, using simple multiplication for 10^decimals
-    double divisor = 1.0;
-    for (int i = 0; i < decimals; i++) {
-      divisor *= 10;
-    }
-
-    final formattedAmount = rawAmount / divisor;
+    // ponytail: replaced custom loop with stdlib
+    final formattedAmount = rawAmount / math.pow(10, decimals);
 
     return TokenBalance(
       assetType: json['asset_type'] ?? '',

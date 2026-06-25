@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:dilexit/presentation/providers/wallet_provider.dart';
+import 'package:dilexit/presentation/providers/auth_provider.dart';
 import 'package:dilexit/constants/network.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -106,6 +107,7 @@ class SettingsScreen extends StatelessWidget {
                       ElevatedButton(
                         onPressed: () async {
                           Navigator.pop(ctx);
+                          await context.read<AuthProvider>().logout();
                           await walletProvider.logout();
                         },
                         style: ElevatedButton.styleFrom(

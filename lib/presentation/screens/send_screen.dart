@@ -161,7 +161,8 @@ class _SendScreenState extends State<SendScreen> {
                               octas,
                             );
 
-                            if (tx != null && mounted) {
+                            if (!context.mounted) return;
+                            if (tx != null) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Row(
@@ -180,16 +181,15 @@ class _SendScreenState extends State<SendScreen> {
                               Navigator.pop(context);
                             }
                           } catch (e) {
-                            if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Error: $e'),
-                                  backgroundColor: theme.colorScheme.error,
-                                ),
-                              );
-                            }
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Error: $e'),
+                                backgroundColor: theme.colorScheme.error,
+                              ),
+                            );
                           } finally {
-                            if (mounted) setState(() => _isSubmitting = false);
+                            if (context.mounted) setState(() => _isSubmitting = false);
                           }
                         }
                       },

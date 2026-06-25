@@ -37,24 +37,18 @@ class _ActionButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onPressed;
-  final bool enabled;
 
   const _ActionButton({
     required this.icon,
     required this.label,
     required this.onPressed,
-    this.enabled = true,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = enabled
-        ? theme.colorScheme.primary
-        : Colors.white.withValues(alpha: 0.3);
-    final bgColor = enabled
-        ? theme.colorScheme.primary.withValues(alpha: 0.15)
-        : Colors.white.withValues(alpha: 0.05);
+    final color = theme.colorScheme.primary;
+    final bgColor = theme.colorScheme.primary.withValues(alpha: 0.15);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -62,7 +56,7 @@ class _ActionButton extends StatelessWidget {
         Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: enabled ? onPressed : null,
+            onTap: onPressed,
             borderRadius: BorderRadius.circular(24),
             splashColor: theme.colorScheme.primary.withValues(alpha: 0.3),
             highlightColor: theme.colorScheme.primary.withValues(alpha: 0.1),
@@ -73,9 +67,7 @@ class _ActionButton extends StatelessWidget {
                 color: bgColor,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: enabled
-                      ? theme.colorScheme.primary.withValues(alpha: 0.3)
-                      : Colors.transparent,
+                  color: theme.colorScheme.primary.withValues(alpha: 0.3),
                   width: 1.5,
                 ),
               ),
@@ -87,7 +79,7 @@ class _ActionButton extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: enabled ? Colors.white : Colors.white.withValues(alpha: 0.5),
+            color: Colors.white,
             fontSize: 14,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.5,

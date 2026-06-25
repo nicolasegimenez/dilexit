@@ -89,9 +89,11 @@ class _PinLoginScreenState extends State<PinLoginScreen>
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(ctx);
-              await context.read<WalletProvider>().logout();
+              final walletProvider = context.read<WalletProvider>();
+              final authProvider = context.read<AuthProvider>();
+              await walletProvider.logout();
               if (context.mounted) {
-                await context.read<AuthProvider>().logout();
+                await authProvider.logout();
               }
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),

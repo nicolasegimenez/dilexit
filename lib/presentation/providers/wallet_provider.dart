@@ -1,9 +1,9 @@
-// Presentation layer - State Management
-import 'package:flutter/material.dart';
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:aptos/aptos.dart';
+import 'package:aptos/coin_client.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dilexit/data/aptos_wallet_client.dart';
-import 'package:dilexit/data/secure_storage_service.dart';
 
 import 'package:dilexit/constants/network.dart';
 import 'package:dilexit/models/wallet_activity.dart';
@@ -37,10 +37,10 @@ class WalletEntity {
 }
 
 class WalletProvider with ChangeNotifier {
-  final AptosWalletClient _walletClient;
-  final SecureStorageService _storageService;
+  AptosClient _aptosClient;
+  final FlutterSecureStorage _storage;
 
-  WalletProvider(this._walletClient, this._storageService)
+  WalletProvider(this._aptosClient, this._storage)
     : _state = WalletState.loading('Starting...') {
     // Try to load persisted wallet on start
     _loadPersistedWallet();
@@ -50,15 +50,65 @@ class WalletProvider with ChangeNotifier {
 
   WalletState get state => _state;
 
+  Future<List<Map<String, dynamic>>> _getWalletsData() async {
+    final listJson = await _storage.read(key: 'aptos_wallets_data_list');
+    if (listJson != null) return jsonDecode(listJson).cast<Map<String, dynamic>>();
+    
+    final singleJson = await _storage.read(key: 'aptos_wallet_data');
+    if (singleJson != null) {
+      final data = jsonDecode(singleJson) as Map<String, dynamic>;
+      final list = [data];
+      await _storage.write(key: 'aptos_wallets_data_list', value: jsonEncode(list));
+      await _storage.write(key: 'aptos_active_wallet_address', value: data['publicAddress']);
+      return list;
+    }
+    return [];
+  }
+
+  Future<void> _addWalletData({
+    required String mnemonics,
+    required String publicAddress,
+    required String? privateKey,
+    String? name,
+  }) async {
+    final wallets = await _getWalletsData();
+    if (!wallets.any((w) => w['publicAddress'] == publicAddress)) {
+      wallets.add({
+        'mnemonics': mnemonics,
+        'publicAddress': publicAddress,
+        'privateKey': privateKey,
+        'name': name ?? 'Wallet ${wallets.length + 1}',
+      });
+      await _storage.write(key: 'aptos_wallets_data_list', value: jsonEncode(wallets));
+    }
+    await _storage.write(key: 'aptos_active_wallet_address', value: publicAddress);
+  }
+
+  Future<BigInt> _fetchBalance(String address) async {
+    try {
+      final balanceResp = await _aptosClient.view(
+        "0x1::coin::balance",
+        ["0x1::aptos_coin::AptosCoin"],
+        [address],
+      );
+      if (balanceResp != null && balanceResp.isNotEmpty) {
+        return BigInt.parse(balanceResp[0].toString());
+      }
+      return BigInt.zero;
+    } catch (e) {
+      return BigInt.zero;
+    }
+  }
+
   Future<void> _loadPersistedWallet() async {
-    final wallets = await _storageService.getWalletsData();
+    final wallets = await _getWalletsData();
     if (wallets.isNotEmpty) {
       _state = WalletState.loading('Loading wallet...');
       notifyListeners();
 
       try {
         // ponytail: removed artificial delay YAGNI
-        String? activeAddress = await _storageService.getActiveWalletAddress();
+        String? activeAddress = await _storage.read(key: 'aptos_active_wallet_address');
 
         Map<String, dynamic> activeData = wallets.last;
         if (activeAddress != null) {
@@ -148,22 +198,15 @@ class WalletProvider with ChangeNotifier {
     );
     notifyListeners();
     try {
-      // Register on-chain (faucet) but don't block if it fails
-      try {
-        final account = AptosAccount.fromPrivateKey(wallet.privateKey);
-        await _walletClient.createWalletOnChain(account);
-      } catch (e) {
-        debugPrint('Faucet funding failed: $e');
-      }
 
-      await _storageService.addWalletData(
+      await _addWalletData(
         mnemonics: mnemonics,
         publicAddress: wallet.publicAddress,
         privateKey: wallet.privateKey,
         name: name,
       );
 
-      final wallets = await _storageService.getWalletsData();
+      final wallets = await _getWalletsData();
       _state = WalletState.loaded(
         wallet,
         mnemonics,
@@ -191,14 +234,15 @@ class WalletProvider with ChangeNotifier {
         balance: BigInt.zero,
       );
 
-      await _storageService.addWalletData(
+      // Save to storage
+      await _addWalletData(
         mnemonics: mnemonics,
-        publicAddress: wallet.publicAddress,
-        privateKey: wallet.privateKey,
+        publicAddress: a,
+        privateKey: p,
         name: name,
       );
 
-      final wallets = await _storageService.getWalletsData();
+      final wallets = await _getWalletsData();
 
       _state = WalletState.loaded(
         wallet,
@@ -215,7 +259,7 @@ class WalletProvider with ChangeNotifier {
   }
 
   Future<bool> switchWallet(String publicAddress) async {
-    final wallets = await _storageService.getWalletsData();
+    final wallets = await _getWalletsData();
     final data = wallets.firstWhere(
       (w) => w['publicAddress'] == publicAddress,
       orElse: () => <String, dynamic>{},
@@ -228,7 +272,7 @@ class WalletProvider with ChangeNotifier {
       notifyListeners();
 
       try {
-        await _storageService.setActiveWalletAddress(publicAddress);
+        await _storage.write(key: 'aptos_active_wallet_address', value: publicAddress);
 
         final mnemonics = data['mnemonics'];
         final (String a, String p) = await compute(
@@ -268,13 +312,13 @@ class WalletProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final wallets = await _storageService.getWalletsData();
+      final wallets = await _getWalletsData();
       final updatedWallets = wallets
           .where((w) => w['publicAddress'] != publicAddress)
           .toList();
 
       if (wallets.length != updatedWallets.length) {
-        await _storageService.overwriteWallets(updatedWallets);
+        await _storage.write(key: 'aptos_wallets_data_list', value: jsonEncode(updatedWallets));
 
         if (_state.wallet?.publicAddress == publicAddress) {
           if (updatedWallets.isNotEmpty) {
@@ -305,7 +349,7 @@ class WalletProvider with ChangeNotifier {
     try {
       // Simply query the repository for the balance of that address
       // No need to import the full wallet to see its public balance
-      final balanceBigInt = await _walletClient.fetchBalance(publicAddress);
+      final balanceBigInt = await _fetchBalance(publicAddress);
       return balanceBigInt / BigInt.from(NetworkConstants.octasPerApt);
     } catch (e) {
       debugPrint('Error getting balance for $publicAddress: $e');
@@ -318,7 +362,10 @@ class WalletProvider with ChangeNotifier {
     notifyListeners();
 
     // Clear storage in background (it's already async)
-    await _storageService.clearWalletsData();
+    await _storage.delete(key: 'aptos_wallets_data_list');
+    await _storage.delete(key: 'aptos_wallet_data');
+    await _storage.delete(key: 'aptos_active_wallet_address');
+    await _storage.delete(key: 'app_pin_hash');
 
     // Reset state
     _state = WalletState.initial();
@@ -329,7 +376,7 @@ class WalletProvider with ChangeNotifier {
     if (_state.currentNetwork == network) return;
 
     _state = _state.copyWith(currentNetwork: network, activities: []);
-    _walletClient.updateClient(network.apiUrl, network.indexerUrl);
+    _aptosClient = AptosClient(network.apiUrl);
     notifyListeners();
 
     fetchBalance();
@@ -343,7 +390,7 @@ class WalletProvider with ChangeNotifier {
       notifyListeners();
 
       try {
-        final balance = await _walletClient.fetchBalance(wallet.publicAddress);
+        final balance = await _fetchBalance(wallet.publicAddress);
         final updatedWallet = wallet.copyWith(balance: balance);
         _state = _state.copyWith(
           wallet: updatedWallet,
@@ -358,8 +405,9 @@ class WalletProvider with ChangeNotifier {
 
       // Try to get tokens (Fungible Assets)
       try {
-        final tokens = await _walletClient.getAccountTokens(
+        final tokens = await getAccountTokens(
           wallet.publicAddress,
+          _state.currentNetwork.indexerUrl,
         );
         _state = _state.copyWith(tokens: tokens);
       } catch (e) {
@@ -377,8 +425,9 @@ class WalletProvider with ChangeNotifier {
       notifyListeners();
 
       try {
-        final activities = await _walletClient.getCoinActivities(
+        final activities = await getCoinActivities(
           wallet.publicAddress,
+          _state.currentNetwork.indexerUrl,
         );
         _state = _state.copyWith(
           activities: activities,
@@ -403,10 +452,11 @@ class WalletProvider with ChangeNotifier {
     try {
       final (String _, String p) = await compute(_importWalletTask, mnemonics);
       final account = AptosAccount.fromPrivateKey(p);
-      final txHash = await _walletClient.transfer(
+      final txHash = await CoinClient(_aptosClient).transfer(
         account,
         receiverAddress,
         amount,
+        createReceiverIfMissing: true,
       );
       _state = _state.copyWith(isTransferring: false);
       notifyListeners();

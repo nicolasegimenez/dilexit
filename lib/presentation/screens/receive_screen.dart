@@ -9,7 +9,6 @@ class ReceiveScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final wallet = context.watch<WalletProvider>().state.wallet;
-    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Receive APT')),
